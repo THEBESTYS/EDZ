@@ -2,6 +2,7 @@
 import React, { useEffect } from 'react';
 import Navbar from './components/Navbar.tsx';
 import Hero from './components/Hero.tsx';
+import About from './components/About.tsx';
 import Marquee from './components/Marquee.tsx';
 import Curriculum from './components/Curriculum.tsx';
 import Features from './components/Features.tsx';
@@ -9,7 +10,6 @@ import Footer from './components/Footer.tsx';
 
 const App: React.FC = () => {
   useEffect(() => {
-    // 2차 확인: 컴포넌트 마운트 시 로딩 화면 제거
     const display = document.getElementById('status-display');
     if (display && !display.classList.contains('hidden')) {
       display.classList.add('hidden');
@@ -36,6 +36,7 @@ const App: React.FC = () => {
       <main className="flex-grow">
         <Hero />
         <Marquee />
+        <About />
         <Curriculum />
         <Features />
       </main>
