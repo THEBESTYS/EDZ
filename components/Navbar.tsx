@@ -1,9 +1,10 @@
 
 import React, { useState, useEffect } from 'react';
-import { LogIn, Github } from 'lucide-react';
+import { LogIn } from 'lucide-react';
 
 const Navbar: React.FC = () => {
   const [scrolled, setScrolled] = useState(false);
+  const edsUrl = "https://thebestys.github.io/EDS/";
 
   useEffect(() => {
     const handleScroll = () => {
@@ -27,21 +28,17 @@ const Navbar: React.FC = () => {
           <a href="#about" className="text-sm font-medium text-white hover:text-yellow-300 transition-colors">소개</a>
           <a href="#curriculum" className="text-sm font-medium text-white hover:text-yellow-300 transition-colors">커리큘럼</a>
           <a href="#features" className="text-sm font-medium text-white hover:text-yellow-300 transition-colors">특장점</a>
-          <a 
-            href="https://github.com/THEBESTYS/EDS" 
-            target="_blank" 
-            rel="noopener noreferrer" 
-            className="flex items-center gap-1.5 text-sm font-bold text-yellow-300 hover:text-white transition-colors border-l border-white/20 pl-6"
-          >
-            <Github className="w-4 h-4" />
-            EDS
-          </a>
         </div>
 
-        <button className="hidden md:flex items-center gap-2 bg-white/10 hover:bg-white/20 px-4 py-2 rounded-full border border-white/20 transition-all text-white">
+        <a 
+          href={edsUrl}
+          target="_blank" 
+          rel="noopener noreferrer"
+          className="hidden md:flex items-center gap-2 bg-white/10 hover:bg-white/20 px-4 py-2 rounded-full border border-white/20 transition-all text-white"
+        >
           <span className="text-xs font-medium">LMS 로그인</span>
           <LogIn className="w-4 h-4" />
-        </button>
+        </a>
       </div>
     </nav>
   );

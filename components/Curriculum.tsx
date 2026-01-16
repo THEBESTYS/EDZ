@@ -1,8 +1,9 @@
 
 import React from 'react';
-import { BookOpen, Star, Briefcase, GraduationCap, Users, TestTube2, LayoutList, ChevronRight } from 'lucide-react';
+import { BookOpen, Star, Briefcase, GraduationCap, Users, LayoutList, ChevronRight } from 'lucide-react';
 
 const Curriculum: React.FC = () => {
+  const edsUrl = "https://thebestys.github.io/EDS/";
   const mainCourses = [
     {
       level: "Beginner",
@@ -116,9 +117,14 @@ const Curriculum: React.FC = () => {
                   <p className="text-sm text-slate-500">지속적인 성취도 분석을 통해 학습 방향을 보정합니다.</p>
                 </div>
               </div>
-              <button className="w-full mt-4 py-4 bg-blue-600 text-white font-bold rounded-xl hover:bg-blue-700 transition-colors flex items-center justify-center gap-2">
+              <a 
+                href={edsUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-full mt-4 py-4 bg-blue-600 text-white font-bold rounded-xl hover:bg-blue-700 transition-colors flex items-center justify-center gap-2"
+              >
                 무료 체험 신청하기 <ChevronRight className="w-4 h-4" />
-              </button>
+              </a>
             </div>
           </div>
         </div>

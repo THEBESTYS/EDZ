@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { ShieldCheck, Target, Users, Smartphone, Headphones, Globe, CheckCircle2 } from 'lucide-react';
+import { ShieldCheck, Target, Users, Smartphone, Headphones, Globe } from 'lucide-react';
 
 const About: React.FC = () => {
   return (
@@ -9,43 +9,43 @@ const About: React.FC = () => {
         {/* 1.1 ED Study 소개 */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center mb-32">
           <div className="reveal-on-scroll">
-            <h2 className="text-4xl font-bold mb-8 leading-tight">글로벌 리더를 위한<br /><span className="text-blue-600">독보적인 교육 철학</span></h2>
+            <h2 className="text-4xl font-bold mb-8 leading-tight">세상을 연결하는 언어,<br /><span className="text-blue-600">ED Study의 철학</span>입니다.</h2>
             <div className="space-y-8">
               <div>
                 <h4 className="flex items-center gap-2 font-bold text-lg mb-2 text-blue-900">
                   <Target className="w-5 h-5 text-blue-600" /> 비전과 미션
                 </h4>
-                <p className="text-slate-600 leading-relaxed italic">"디지털 네이티브를 위한 글로벌 소통의 창"</p>
-                <p className="text-slate-500 text-sm mt-1">국경 없는 미래 사회에서 자신의 역량을 100% 발휘할 수 있는 언어 도구(English Tool)를 제공합니다.</p>
+                <p className="text-slate-600 leading-relaxed">디지털 네이티브 세대를 위한 최적의 영어 환경을 구축하여, 누구나 전 세계 어디서든 소통할 수 있는 글로벌 인재로 성장시키는 것이 우리의 사명입니다.</p>
               </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div className="p-5 bg-blue-50 rounded-2xl border border-blue-100">
-                  <ShieldCheck className="w-5 h-5 text-blue-600 mb-3" />
-                  <h4 className="font-bold mb-2">교육 철학</h4>
-                  <p className="text-xs text-slate-500">실생활 맥락(Context) 중심 학습을 통해 자연스러운 언어 습득을 유도합니다.</p>
+              <div>
+                <h4 className="flex items-center gap-2 font-bold text-lg mb-2 text-blue-900">
+                  <ShieldCheck className="w-5 h-5 text-blue-600" /> 교육 철학
+                </h4>
+                <p className="text-slate-600 leading-relaxed">단순 암기가 아닌 '상황 중심(Context-rich)' 학습을 지향합니다. 실제 원어민의 환경을 디지털로 구현하여 자연스러운 습득을 유도합니다.</p>
+              </div>
+              <div className="p-6 bg-blue-50 rounded-2xl border border-blue-100">
+                <div className="flex items-center gap-4 mb-3">
+                  <Users className="w-6 h-6 text-blue-600" />
+                  <h4 className="font-bold">베테랑 강사진</h4>
                 </div>
-                <div className="p-5 bg-yellow-50 rounded-2xl border border-yellow-100">
-                  <Users className="w-5 h-5 text-yellow-600 mb-3" />
-                  <h4 className="font-bold mb-2">전문 강사진</h4>
-                  <p className="text-xs text-slate-500">TESOL 보유 및 10년 이상의 베테랑 강사진이 데이터 기반 코칭을 제공합니다.</p>
-                </div>
+                <p className="text-sm text-slate-500 italic">TESOL 자격증 및 10년 이상의 교육 경력을 보유한 전문가들이 학습 데이터 기반의 맞춤형 가이드를 제공합니다.</p>
               </div>
             </div>
           </div>
           <div className="reveal-on-scroll relative" style={{ transitionDelay: '0.2s' }}>
-            <img src="https://images.unsplash.com/photo-1516321318423-f06f85e504b3?q=80&w=2070&auto=format&fit=crop" alt="Learning Experience" className="rounded-3xl shadow-2xl" />
-            <div className="absolute -bottom-6 -right-6 bg-blue-600 text-white p-6 rounded-2xl shadow-xl hidden md:block">
-              <p className="font-bold text-lg">Online & Mobile</p>
-              <p className="text-xs opacity-80 uppercase tracking-widest">Seamless Learning</p>
+            <img src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?q=80&w=2071&auto=format&fit=crop" alt="Team Study" className="rounded-3xl shadow-2xl" />
+            <div className="absolute -bottom-8 -left-8 bg-yellow-400 p-8 rounded-2xl shadow-xl hidden md:block">
+              <p className="text-blue-900 font-bold text-2xl">100%</p>
+              <p className="text-blue-900/70 text-xs font-bold uppercase tracking-wider">Expert Tutors</p>
             </div>
           </div>
         </div>
 
-        {/* 1.2 플랫폼 & 1.3 환경 */}
+        {/* 1.2 플랫폼 소개 & 1.3 학습 환경 */}
         <div className="bg-slate-50 rounded-[3rem] p-12 md:p-20 reveal-on-scroll">
           <div className="text-center max-w-2xl mx-auto mb-16">
             <h3 className="text-3xl font-bold mb-4">English Discoveries Platform</h3>
-            <p className="text-slate-500">전 세계 100만 명 이상이 선택한 에듀소프트(Edusoft)의 공식 파트너</p>
+            <p className="text-slate-500">글로벌 교육 기업 Edusoft와 파트너십을 통해 제공되는 검증된 시스템</p>
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
@@ -53,22 +53,22 @@ const About: React.FC = () => {
               <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center mx-auto mb-6 shadow-sm">
                 <Globe className="w-8 h-8 text-blue-600" />
               </div>
-              <h5 className="font-bold text-lg mb-3">글로벌 표준 인증</h5>
-              <p className="text-sm text-slate-500 leading-relaxed">CEFR 국제 표준에 따른 10단계 레벨 구성으로 객관적인 실력 증명이 가능합니다.</p>
+              <h5 className="font-bold text-lg mb-3">글로벌 인증</h5>
+              <p className="text-sm text-slate-500">CEFR 국제 표준에 따른 10단계 레벨 구성 및 전 세계 100만 명 이상 사용</p>
             </div>
             <div className="text-center">
               <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center mx-auto mb-6 shadow-sm">
                 <Smartphone className="w-8 h-8 text-blue-600" />
               </div>
-              <h5 className="font-bold text-lg mb-3">전방위 학습 지원</h5>
-              <p className="text-sm text-slate-500 leading-relaxed">PC부터 스마트폰까지, 언제 어디서나 동일한 학습 경험을 모바일로 제공합니다.</p>
+              <h5 className="font-bold text-lg mb-3">멀티 디바이스</h5>
+              <p className="text-sm text-slate-500">PC, 태블릿, 모바일을 넘나드는 끊김 없는(Seamless) 학습 환경 제공</p>
             </div>
             <div className="text-center">
               <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center mx-auto mb-6 shadow-sm">
                 <Headphones className="w-8 h-8 text-blue-600" />
               </div>
-              <h5 className="font-bold text-lg mb-3">기술 지원 서비스</h5>
-              <p className="text-sm text-slate-500 leading-relaxed">24/7 원격 기술 지원을 통해 학습 중 발생하는 모든 디지털 이슈를 즉각 해결합니다.</p>
+              <h5 className="font-bold text-lg mb-3">24/7 기술 지원</h5>
+              <p className="text-sm text-slate-500">원활한 학습을 위해 연중무휴 실시간 기술 상담 및 원격 지원 시스템 운영</p>
             </div>
           </div>
         </div>

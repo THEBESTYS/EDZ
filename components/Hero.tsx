@@ -3,6 +3,8 @@ import React from 'react';
 import { ArrowRight, PlayCircle, Award, MonitorPlay, BrainCircuit, Globe2 } from 'lucide-react';
 
 const Hero: React.FC = () => {
+  const edsUrl = "https://thebestys.github.io/EDS/";
+
   return (
     <header id="about" className="relative min-h-[100svh] pt-20 overflow-hidden flex flex-col justify-between">
       {/* Background Gradient */}
@@ -35,12 +37,22 @@ const Hero: React.FC = () => {
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center animate-fade-in" style={{ animationDelay: '0.3s' }}>
-            <button className="bg-white text-blue-900 px-8 py-4 font-bold text-base hover:bg-yellow-300 transition-all shadow-xl shadow-blue-900/20 rounded-lg hover:-translate-y-1 flex items-center gap-2">
+            <a 
+              href={edsUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="bg-white text-blue-900 px-8 py-4 font-bold text-base hover:bg-yellow-300 transition-all shadow-xl shadow-blue-900/20 rounded-lg hover:-translate-y-1 flex items-center gap-2"
+            >
               무료 레벨테스트 <ArrowRight className="w-4 h-4" />
-            </button>
-            <button className="px-8 py-4 font-medium text-base text-white border border-white/30 hover:bg-white/10 transition-colors rounded-lg flex items-center gap-2">
+            </a>
+            <a 
+              href={edsUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="px-8 py-4 font-medium text-base text-white border border-white/30 hover:bg-white/10 transition-colors rounded-lg flex items-center gap-2"
+            >
               <PlayCircle className="w-5 h-5" /> 플랫폼 미리보기
-            </button>
+            </a>
           </div>
         </div>
 

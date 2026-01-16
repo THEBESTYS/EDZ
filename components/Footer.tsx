@@ -3,12 +3,14 @@ import React from 'react';
 import { Facebook, Instagram, Youtube } from 'lucide-react';
 
 const Footer: React.FC = () => {
+  const edsUrl = "https://thebestys.github.io/EDS/";
+
   return (
     <footer className="bg-blue-950 border-t border-blue-900 pt-20 pb-10 relative z-30">
       <div className="max-w-7xl mx-auto px-6 md:px-12">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-16">
           <div className="col-span-1 md:col-span-2">
-            <a href="#" className="flex items-center gap-2 mb-6">
+            <a href={edsUrl} className="flex items-center gap-2 mb-6">
               <div className="bg-blue-600 text-white p-1 px-2 rounded font-bold en-font text-md">ED</div>
               <span className="font-sans text-xl font-bold tracking-tight text-white italic">Study</span>
             </a>
@@ -31,20 +33,20 @@ const Footer: React.FC = () => {
           <div>
             <h4 className="text-white font-bold text-sm mb-6">수강 과정</h4>
             <ul className="space-y-4">
-              <li><a href="#" className="text-sm text-blue-200/60 hover:text-yellow-400 transition-colors">기초 영어 (Basic)</a></li>
-              <li><a href="#" className="text-sm text-blue-200/60 hover:text-yellow-400 transition-colors">비즈니스 영어</a></li>
-              <li><a href="#" className="text-sm text-blue-200/60 hover:text-yellow-400 transition-colors">시험 대비반 (TOEIC)</a></li>
-              <li><a href="#" className="text-sm text-blue-200/60 hover:text-yellow-400 transition-colors">스피킹 집중 훈련</a></li>
+              <li><a href="#curriculum" className="text-sm text-blue-200/60 hover:text-yellow-400 transition-colors">기초 영어 (Basic)</a></li>
+              <li><a href="#curriculum" className="text-sm text-blue-200/60 hover:text-yellow-400 transition-colors">비즈니스 영어</a></li>
+              <li><a href="#curriculum" className="text-sm text-blue-200/60 hover:text-yellow-400 transition-colors">시험 대비반 (TOEIC)</a></li>
+              <li><a href="#curriculum" className="text-sm text-blue-200/60 hover:text-yellow-400 transition-colors">스피킹 집중 훈련</a></li>
             </ul>
           </div>
 
           <div>
             <h4 className="text-white font-bold text-sm mb-6">고객 센터</h4>
             <ul className="space-y-4">
-              <li><a href="#" className="text-sm text-blue-200/60 hover:text-yellow-400 transition-colors">공지사항</a></li>
-              <li><a href="#" className="text-sm text-blue-200/60 hover:text-yellow-400 transition-colors">자주 묻는 질문</a></li>
-              <li><a href="#" className="text-sm text-blue-200/60 hover:text-yellow-400 transition-colors">1:1 문의하기</a></li>
-              <li><a href="#" className="text-sm text-blue-200/60 hover:text-yellow-400 transition-colors">기업 출강 문의</a></li>
+              <li><a href={edsUrl} target="_blank" rel="noopener noreferrer" className="text-sm text-blue-200/60 hover:text-yellow-400 transition-colors">공지사항</a></li>
+              <li><a href={edsUrl} target="_blank" rel="noopener noreferrer" className="text-sm text-blue-200/60 hover:text-yellow-400 transition-colors">자주 묻는 질문</a></li>
+              <li><a href={edsUrl} target="_blank" rel="noopener noreferrer" className="text-sm text-blue-200/60 hover:text-yellow-400 transition-colors">1:1 문의하기</a></li>
+              <li><a href={edsUrl} target="_blank" rel="noopener noreferrer" className="text-sm text-blue-200/60 hover:text-yellow-400 transition-colors">기업 출강 문의</a></li>
             </ul>
           </div>
         </div>
