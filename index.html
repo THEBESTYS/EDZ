@@ -19,6 +19,8 @@
             overflow-x: hidden;
             word-break: keep-all;
             -webkit-font-smoothing: antialiased;
+            margin: 0;
+            padding: 0;
         }
         .en-font { font-family: 'Oswald', sans-serif; }
         
@@ -63,6 +65,20 @@
             opacity: 1;
             transform: translateY(0);
         }
+
+        /* Prevent empty blue screen while loading */
+        #root:empty::before {
+            content: 'Loading ED Study...';
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            width: 100vw;
+            color: white;
+            font-size: 1.25rem;
+            font-weight: 500;
+            background: #2563eb;
+        }
     </style>
 <script type="importmap">
 {
@@ -77,5 +93,7 @@
 </head>
 <body class="bg-blue-600">
     <div id="root"></div>
+    <!-- Explicitly import the entry point script -->
+    <script type="module" src="index.tsx"></script>
 </body>
 </html>
