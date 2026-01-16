@@ -9,10 +9,13 @@ import Footer from './components/Footer.tsx';
 
 const App: React.FC = () => {
   useEffect(() => {
-    const observerOptions = {
-      threshold: 0.1,
-    };
+    // 2차 확인: 컴포넌트 마운트 시 로딩 화면 제거
+    const display = document.getElementById('status-display');
+    if (display && !display.classList.contains('hidden')) {
+      display.classList.add('hidden');
+    }
 
+    const observerOptions = { threshold: 0.1 };
     const observer = new IntersectionObserver((entries) => {
       entries.forEach((entry) => {
         if (entry.isIntersecting) {
@@ -28,9 +31,9 @@ const App: React.FC = () => {
   }, []);
 
   return (
-    <div className="flex flex-col min-h-screen">
+    <div className="flex flex-col min-h-screen bg-blue-600">
       <Navbar />
-      <main>
+      <main className="flex-grow">
         <Hero />
         <Marquee />
         <Curriculum />

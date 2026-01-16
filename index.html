@@ -17,83 +17,46 @@
         body {
             font-family: var(--font-sans);
             overflow-x: hidden;
-            word-break: keep-all;
-            -webkit-font-smoothing: antialiased;
             margin: 0;
             padding: 0;
-            background-color: #2563eb; /* 기본 배경색 */
+            background-color: #2563eb; 
         }
-        .en-font { font-family: 'Oswald', sans-serif; }
-        
-        /* Smooth Fade In Animation */
-        @keyframes fadeInUp {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        .animate-fade-in {
-            opacity: 0;
-            animation: fadeInUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-        }
-        
-        /* Marquee Animation */
-        @keyframes scroll {
-            0% { transform: translateX(0); }
-            100% { transform: translateX(-50%); }
-        }
-        .marquee-content {
-            animation: scroll 40s linear infinite;
-        }
-
-        /* Glass Effects */
-        .glass-panel {
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-        }
-        .hero-mask {
-            mask-image: linear-gradient(to bottom, black 80%, transparent 100%);
-            -webkit-mask-image: linear-gradient(to bottom, black 80%, transparent 100%);
-        }
-
-        /* Scroll Reveal Utility */
-        .reveal-on-scroll {
-            opacity: 0;
-            transform: translateY(30px);
-            transition: all 0.8s cubic-bezier(0.2, 0.8, 0.2, 1);
-        }
-        .reveal-on-scroll.active {
-            opacity: 1;
-            transform: translateY(0);
-        }
-
-        /* Prevent empty blue screen while loading */
-        #root:empty::before {
-            content: 'ED Study 로딩 중...';
+        #status-display {
+            position: fixed;
+            inset: 0;
             display: flex;
+            flex-direction: column;
             align-items: center;
             justify-content: center;
-            height: 100vh;
-            width: 100vw;
-            color: white;
-            font-size: 1.25rem;
-            font-weight: 500;
             background: #2563eb;
-            position: fixed;
-            top: 0;
-            left: 0;
-            z-index: 1000;
+            color: white;
+            z-index: 9999;
+            transition: opacity 0.5s ease, visibility 0.5s;
         }
+        #status-display.hidden {
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+        }
+        .loading-spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid rgba(255,255,255,0.3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 1s ease-in-out infinite;
+            margin-bottom: 20px;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
     </style>
 
-    <!-- Import Map: 의존성 정의 보강 -->
     <script type="importmap">
 {
   "imports": {
     "react": "https://esm.sh/react@19.0.0",
     "react-dom": "https://esm.sh/react-dom@19.0.0",
     "react-dom/client": "https://esm.sh/react-dom@19.0.0/client",
-    "lucide-react": "https://esm.sh/lucide-react@0.468.0",
+    "lucide-react": "https://esm.sh/lucide-react@0.468.0?bundle",
     "react-dom/": "https://esm.sh/react-dom@^19.2.3/",
     "react/": "https://esm.sh/react@^19.2.3/"
   }
@@ -101,8 +64,25 @@
 </script>
 </head>
 <body>
+    <div id="status-display">
+        <div class="loading-spinner"></div>
+        <div style="font-size: 1.25rem; font-weight: 500;">ED Study 로딩 중...</div>
+        <div id="error-message" style="margin-top: 15px; font-size: 13px; opacity: 0.7; max-width: 80%; text-align: center;"></div>
+    </div>
+    
     <div id="root"></div>
-    <!-- 모듈 스크립트 실행 -->
+
+    <!-- 5초 후에도 로딩이 안 끝나면 강제 시도 메시지 표시 -->
+    <script>
+        setTimeout(() => {
+            const display = document.getElementById('status-display');
+            if (display && !display.classList.contains('hidden')) {
+                const errorMsg = document.getElementById('error-message');
+                if (errorMsg) errorMsg.innerText = "네트워크 상태가 불안정하거나 파일을 불러오는데 시간이 걸리고 있습니다. 잠시만 더 기다려주시거나 페이지를 새로고침 해주세요.";
+            }
+        }, 5000);
+    </script>
+
     <script type="module" src="./index.tsx"></script>
 </body>
 </html>
