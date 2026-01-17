@@ -14,7 +14,7 @@ const Navbar: React.FC<NavbarProps> = ({ onAdminClick }) => {
   const [isUserLoggedIn, setIsUserLoggedIn] = useState(false);
   
   const edsUrl = "https://thebestys.github.io/EDS/";
-  const sLevelTestUrl = "https://github.com/THEBESTYS/EDAI";
+  const sLevelTestUrl = "https://thebestys.github.io/EDAI/";
 
   // Form states
   const [formData, setFormData] = useState({
@@ -62,7 +62,8 @@ const Navbar: React.FC<NavbarProps> = ({ onAdminClick }) => {
       const newUser = {
         ...formData,
         id: Date.now(),
-        createdAt: new Date().toISOString()
+        createdAt: new Date().toISOString(),
+        level: 'Silver' // Default level
       };
       
       localStorage.setItem('edstudy_users', JSON.stringify([...existingUsers, newUser]));
@@ -106,7 +107,8 @@ const Navbar: React.FC<NavbarProps> = ({ onAdminClick }) => {
         password: '***',
         id: Date.now(),
         createdAt: new Date().toISOString(),
-        provider: 'google'
+        provider: 'google',
+        level: 'Silver'
       };
       
       if (!existingUsers.find((u: any) => u.email === googleUser.email)) {

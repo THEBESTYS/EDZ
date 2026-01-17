@@ -1,6 +1,8 @@
 
 import React, { useState, useEffect } from 'react';
-import { LayoutDashboard, Download, LogOut, Search, Users, ShieldAlert, ArrowLeft } from 'lucide-react';
+import { LayoutDashboard, Download, LogOut, Search, Users, ShieldAlert, ArrowLeft, Trash2, ShieldCheck, Gem, Medal, Award } from 'lucide-react';
+
+type UserLevel = 'Diamond' | 'Gold' | 'Silver';
 
 interface UserData {
   id: number;
@@ -9,6 +11,7 @@ interface UserData {
   phone: string;
   createdAt: string;
   provider?: string;
+  level?: UserLevel;
 }
 
 interface AdminProps {
@@ -24,10 +27,14 @@ const Admin: React.FC<AdminProps> = ({ onExit }) => {
 
   useEffect(() => {
     if (isLoggedIn) {
-      const storedUsers = JSON.parse(localStorage.getItem('edstudy_users') || '[]');
-      setUsers(storedUsers);
+      loadUsers();
     }
   }, [isLoggedIn]);
+
+  const loadUsers = () => {
+    const storedUsers = JSON.parse(localStorage.getItem('edstudy_users') || '[]');
+    setUsers(storedUsers);
+  };
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
@@ -38,17 +45,31 @@ const Admin: React.FC<AdminProps> = ({ onExit }) => {
     }
   };
 
+  const deleteUser = (userId: number) => {
+    if (window.confirm('정말 이 회원을 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.')) {
+      const updatedUsers = users.filter(u => u.id !== userId);
+      localStorage.setItem('edstudy_users', JSON.stringify(updatedUsers));
+      setUsers(updatedUsers);
+    }
+  };
+
+  const updateLevel = (userId: number, newLevel: UserLevel) => {
+    const updatedUsers = users.map(u => u.id === userId ? { ...u, level: newLevel } : u);
+    localStorage.setItem('edstudy_users', JSON.stringify(updatedUsers));
+    setUsers(updatedUsers);
+  };
+
   const downloadExcel = () => {
     if (users.length === 0) return alert('내보낼 데이터가 없습니다.');
     
-    // Create CSV content
-    const headers = ['성명', '이메일', '핸드폰 번호', '가입일', '가입경로'];
+    const headers = ['성명', '이메일', '핸드폰 번호', '가입일', '가입경로', '회원등급'];
     const rows = users.map(u => [
       u.name,
       u.email,
       u.phone,
       new Date(u.createdAt).toLocaleDateString(),
-      u.provider || '직접가입'
+      u.provider || '직접가입',
+      u.level || 'Silver'
     ]);
     
     const csvContent = "\uFEFF" + [headers, ...rows].map(e => e.join(",")).join("\n");
@@ -67,6 +88,14 @@ const Admin: React.FC<AdminProps> = ({ onExit }) => {
     u.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
     u.phone.includes(searchTerm)
   );
+
+  const getLevelBadgeStyle = (level?: UserLevel) => {
+    switch (level) {
+      case 'Diamond': return 'bg-cyan-100 text-cyan-700 border-cyan-200';
+      case 'Gold': return 'bg-yellow-100 text-yellow-700 border-yellow-200';
+      default: return 'bg-slate-100 text-slate-600 border-slate-200';
+    }
+  };
 
   if (!isLoggedIn) {
     return (
@@ -112,7 +141,6 @@ const Admin: React.FC<AdminProps> = ({ onExit }) => {
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900">
-      {/* Sidebar / Header */}
       <header className="bg-white border-b border-slate-200 sticky top-0 z-40">
         <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
           <div className="flex items-center gap-4">
@@ -137,21 +165,40 @@ const Admin: React.FC<AdminProps> = ({ onExit }) => {
       </header>
 
       <main className="max-w-7xl mx-auto px-6 py-10">
-        {/* Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
-          <div className="bg-white p-8 rounded-3xl shadow-sm border border-slate-200 flex items-center gap-6">
-            <div className="bg-blue-100 p-4 rounded-2xl text-blue-600"><Users className="w-8 h-8" /></div>
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-10">
+          <div className="bg-white p-6 rounded-3xl shadow-sm border border-slate-200 flex items-center gap-4">
+            <div className="bg-blue-100 p-3 rounded-2xl text-blue-600"><Users className="w-6 h-6" /></div>
             <div>
-              <p className="text-slate-500 text-sm font-medium">총 회원수</p>
-              <h3 className="text-3xl font-bold">{users.length}명</h3>
+              <p className="text-slate-500 text-[10px] font-bold uppercase tracking-wider">총 회원수</p>
+              <h3 className="text-xl font-bold">{users.length}명</h3>
+            </div>
+          </div>
+          <div className="bg-white p-6 rounded-3xl shadow-sm border border-slate-200 flex items-center gap-4">
+            <div className="bg-cyan-100 p-3 rounded-2xl text-cyan-600"><Gem className="w-6 h-6" /></div>
+            <div>
+              <p className="text-slate-500 text-[10px] font-bold uppercase tracking-wider">다이아몬드</p>
+              <h3 className="text-xl font-bold">{users.filter(u => u.level === 'Diamond').length}명</h3>
+            </div>
+          </div>
+          <div className="bg-white p-6 rounded-3xl shadow-sm border border-slate-200 flex items-center gap-4">
+            <div className="bg-yellow-100 p-3 rounded-2xl text-yellow-600"><Medal className="w-6 h-6" /></div>
+            <div>
+              <p className="text-slate-500 text-[10px] font-bold uppercase tracking-wider">골드</p>
+              <h3 className="text-xl font-bold">{users.filter(u => u.level === 'Gold').length}명</h3>
+            </div>
+          </div>
+          <div className="bg-white p-6 rounded-3xl shadow-sm border border-slate-200 flex items-center gap-4">
+            <div className="bg-slate-100 p-3 rounded-2xl text-slate-600"><Award className="w-6 h-6" /></div>
+            <div>
+              <p className="text-slate-500 text-[10px] font-bold uppercase tracking-wider">실버</p>
+              <h3 className="text-xl font-bold">{users.filter(u => u.level === 'Silver' || !u.level).length}명</h3>
             </div>
           </div>
         </div>
 
-        {/* User Table */}
         <div className="bg-white rounded-[2.5rem] shadow-sm border border-slate-200 overflow-hidden">
           <div className="p-8 border-b border-slate-100 flex flex-col md:flex-row md:items-center justify-between gap-4">
-            <h4 className="text-lg font-bold">회원 명단</h4>
+            <h4 className="text-lg font-bold">회원 명단 관리</h4>
             <div className="relative w-full md:w-80">
               <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
               <input 
@@ -167,24 +214,46 @@ const Admin: React.FC<AdminProps> = ({ onExit }) => {
             <table className="w-full text-left">
               <thead>
                 <tr className="bg-slate-50 text-slate-500 text-xs uppercase tracking-wider">
-                  <th className="px-8 py-4 font-bold">성명</th>
-                  <th className="px-8 py-4 font-bold">이메일</th>
+                  <th className="px-8 py-4 font-bold">성명 / 정보</th>
                   <th className="px-8 py-4 font-bold">핸드폰 번호</th>
-                  <th className="px-8 py-4 font-bold">가입일</th>
-                  <th className="px-8 py-4 font-bold">가입경로</th>
+                  <th className="px-8 py-4 font-bold">등급 설정</th>
+                  <th className="px-8 py-4 font-bold">가입일 / 경로</th>
+                  <th className="px-8 py-4 font-bold text-center">작업</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 text-sm">
                 {filteredUsers.length > 0 ? filteredUsers.map((user) => (
                   <tr key={user.id} className="hover:bg-slate-50 transition-colors">
-                    <td className="px-8 py-5 font-bold text-slate-900">{user.name}</td>
-                    <td className="px-8 py-5 text-slate-600">{user.email}</td>
-                    <td className="px-8 py-5 text-slate-600">{user.phone}</td>
-                    <td className="px-8 py-5 text-slate-400">{new Date(user.createdAt).toLocaleDateString()}</td>
                     <td className="px-8 py-5">
-                      <span className={`px-2 py-1 rounded-full text-[10px] font-bold uppercase ${user.provider === 'google' ? 'bg-blue-100 text-blue-700' : 'bg-slate-100 text-slate-600'}`}>
+                      <p className="font-bold text-slate-900">{user.name}</p>
+                      <p className="text-xs text-slate-400 font-medium">{user.email}</p>
+                    </td>
+                    <td className="px-8 py-5 text-slate-600 font-medium">{user.phone}</td>
+                    <td className="px-8 py-5">
+                      <select 
+                        value={user.level || 'Silver'} 
+                        onChange={(e) => updateLevel(user.id, e.target.value as UserLevel)}
+                        className={`text-xs font-bold px-3 py-1.5 rounded-lg border focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer transition-all ${getLevelBadgeStyle(user.level)}`}
+                      >
+                        <option value="Diamond">💎 Diamond</option>
+                        <option value="Gold">🥇 Gold</option>
+                        <option value="Silver">🥈 Silver</option>
+                      </select>
+                    </td>
+                    <td className="px-8 py-5">
+                      <p className="text-slate-600 font-medium">{new Date(user.createdAt).toLocaleDateString()}</p>
+                      <span className={`px-2 py-0.5 rounded text-[9px] font-bold uppercase ${user.provider === 'google' ? 'bg-blue-50 text-blue-500' : 'bg-slate-50 text-slate-400'}`}>
                         {user.provider || 'Direct'}
                       </span>
+                    </td>
+                    <td className="px-8 py-5 text-center">
+                      <button 
+                        onClick={() => deleteUser(user.id)}
+                        className="p-2 text-slate-300 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all"
+                        title="회원 삭제"
+                      >
+                        <Trash2 className="w-5 h-5" />
+                      </button>
                     </td>
                   </tr>
                 )) : (
