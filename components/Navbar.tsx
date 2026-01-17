@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { LogIn, UserPlus, X, Mail, Lock, Chrome, User, Phone } from 'lucide-react';
+import { LogIn, UserPlus, X, Mail, Lock, Chrome, User, Phone, LockKeyhole } from 'lucide-react';
 
 interface NavbarProps {
   onAdminClick?: () => void;
@@ -11,14 +11,20 @@ const Navbar: React.FC<NavbarProps> = ({ onAdminClick }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [authMode, setAuthMode] = useState<'login' | 'signup'>('login');
   const [isLoading, setIsLoading] = useState(false);
+  const [isUserLoggedIn, setIsUserLoggedIn] = useState(false);
   
   const edsUrl = "https://thebestys.github.io/EDS/";
+  const sLevelTestUrl = "https://github.com/THEBESTYS/EDAI";
 
-  // Signup form state
+  // Form states
   const [formData, setFormData] = useState({
     email: '',
     phone: '',
     name: '',
+    password: ''
+  });
+  const [loginData, setLoginData] = useState({
+    email: '',
     password: ''
   });
 
@@ -26,6 +32,10 @@ const Navbar: React.FC<NavbarProps> = ({ onAdminClick }) => {
     const handleScroll = () => {
       setScrolled(window.scrollY > 50);
     };
+    // Check session on load
+    const session = sessionStorage.getItem('edstudy_session');
+    if (session) setIsUserLoggedIn(true);
+
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
@@ -40,13 +50,13 @@ const Navbar: React.FC<NavbarProps> = ({ onAdminClick }) => {
     setIsModalOpen(false);
     document.body.style.overflow = 'unset';
     setFormData({ email: '', phone: '', name: '', password: '' });
+    setLoginData({ email: '', password: '' });
   };
 
   const handleSignup = (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
 
-    // Simulate database delay
     setTimeout(() => {
       const existingUsers = JSON.parse(localStorage.getItem('edstudy_users') || '[]');
       const newUser = {
@@ -56,15 +66,37 @@ const Navbar: React.FC<NavbarProps> = ({ onAdminClick }) => {
       };
       
       localStorage.setItem('edstudy_users', JSON.stringify([...existingUsers, newUser]));
+      sessionStorage.setItem('edstudy_session', JSON.stringify(newUser));
+      setIsUserLoggedIn(true);
       setIsLoading(false);
-      alert(`${formData.name}님, 회원가입이 완료되었습니다!`);
+      alert(`${formData.name}님, 회원가입 및 로그인이 완료되었습니다!`);
       closeModal();
     }, 1000);
   };
 
+  const handleLogin = (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
+
+    setTimeout(() => {
+      const existingUsers = JSON.parse(localStorage.getItem('edstudy_users') || '[]');
+      const user = existingUsers.find((u: any) => u.email === loginData.email && u.password === loginData.password);
+
+      if (user) {
+        sessionStorage.setItem('edstudy_session', JSON.stringify(user));
+        setIsUserLoggedIn(true);
+        setIsLoading(false);
+        alert(`${user.name}님, 환영합니다!`);
+        closeModal();
+      } else {
+        setIsLoading(false);
+        alert('이메일 또는 비밀번호가 일치하지 않습니다.');
+      }
+    }, 800);
+  };
+
   const handleGoogleLogin = () => {
     setIsLoading(true);
-    // Simulate Google OAuth
     setTimeout(() => {
       const existingUsers = JSON.parse(localStorage.getItem('edstudy_users') || '[]');
       const googleUser = {
@@ -81,10 +113,26 @@ const Navbar: React.FC<NavbarProps> = ({ onAdminClick }) => {
         localStorage.setItem('edstudy_users', JSON.stringify([...existingUsers, googleUser]));
       }
       
+      sessionStorage.setItem('edstudy_session', JSON.stringify(googleUser));
+      setIsUserLoggedIn(true);
       setIsLoading(false);
       alert('Google 계정으로 로그인되었습니다.');
       closeModal();
     }, 1200);
+  };
+
+  const handleLogout = () => {
+    sessionStorage.removeItem('edstudy_session');
+    setIsUserLoggedIn(false);
+    alert('로그아웃 되었습니다.');
+  };
+
+  const handleSLevelTestClick = (e: React.MouseEvent) => {
+    if (!isUserLoggedIn) {
+      e.preventDefault();
+      alert('S-Level Test는 회원 전용 메뉴입니다. 먼저 로그인해 주세요.');
+      openModal('login');
+    }
   };
 
   return (
@@ -98,28 +146,50 @@ const Navbar: React.FC<NavbarProps> = ({ onAdminClick }) => {
             <span className="font-sans text-xl font-bold tracking-tight text-white italic">Study</span>
           </a>
           
-          <div className="hidden md:flex items-center gap-8">
+          <div className="hidden md:flex items-center gap-6">
             <a href="#about" className="text-sm font-medium text-white hover:text-yellow-300 transition-colors">소개</a>
             <a href="#curriculum" className="text-sm font-medium text-white hover:text-yellow-300 transition-colors">커리큘럼</a>
             <a href="#features" className="text-sm font-medium text-white hover:text-yellow-300 transition-colors">특장점</a>
-            <a href={edsUrl} target="_blank" rel="noopener noreferrer" className="text-sm font-bold text-yellow-300 hover:text-white transition-colors border-b border-yellow-300/30">EDI</a>
+            <div className="h-4 w-px bg-white/20 mx-2"></div>
+            <a href={edsUrl} target="_blank" rel="noopener noreferrer" className="text-sm font-bold text-yellow-300 hover:text-white transition-colors">EDI</a>
+            <a 
+              href={sLevelTestUrl} 
+              target={isUserLoggedIn ? "_blank" : "_self"} 
+              rel="noopener noreferrer" 
+              onClick={handleSLevelTestClick}
+              className={`text-sm font-bold flex items-center gap-1 transition-colors ${isUserLoggedIn ? 'text-green-300 hover:text-white' : 'text-white/60 hover:text-white'}`}
+            >
+              {!isUserLoggedIn && <LockKeyhole className="w-3 h-3" />}
+              S-Level Test
+            </a>
           </div>
 
           <div className="flex items-center gap-3">
-            <button 
-              onClick={() => openModal('signup')}
-              className="hidden md:flex items-center gap-2 text-white/80 hover:text-white text-sm font-medium px-3 py-2 transition-colors"
-            >
-              <UserPlus className="w-4 h-4" />
-              <span>Sign-up</span>
-            </button>
-            <button 
-              onClick={() => openModal('login')}
-              className="flex items-center gap-2 bg-white text-blue-600 hover:bg-yellow-300 px-5 py-2 rounded-full shadow-md transition-all font-bold text-sm"
-            >
-              <LogIn className="w-4 h-4" />
-              <span>LMS 로그인</span>
-            </button>
+            {isUserLoggedIn ? (
+              <button 
+                onClick={handleLogout}
+                className="flex items-center gap-2 bg-white/10 hover:bg-white/20 px-5 py-2 rounded-full text-white transition-all font-bold text-sm border border-white/20"
+              >
+                <span>로그아웃</span>
+              </button>
+            ) : (
+              <>
+                <button 
+                  onClick={() => openModal('signup')}
+                  className="hidden md:flex items-center gap-2 text-white/80 hover:text-white text-sm font-medium px-3 py-2 transition-colors"
+                >
+                  <UserPlus className="w-4 h-4" />
+                  <span>Sign-up</span>
+                </button>
+                <button 
+                  onClick={() => openModal('login')}
+                  className="flex items-center gap-2 bg-white text-blue-600 hover:bg-yellow-300 px-5 py-2 rounded-full shadow-md transition-all font-bold text-sm"
+                >
+                  <LogIn className="w-4 h-4" />
+                  <span>LMS 로그인</span>
+                </button>
+              </>
+            )}
           </div>
         </div>
       </nav>
@@ -146,29 +216,38 @@ const Navbar: React.FC<NavbarProps> = ({ onAdminClick }) => {
 
               {authMode === 'login' ? (
                 /* Login Form */
-                <form className="space-y-4" onSubmit={(e) => e.preventDefault()}>
+                <form className="space-y-4" onSubmit={handleLogin}>
                   <div className="relative">
                     <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
                     <input 
+                      required
                       type="email" 
                       placeholder="이메일 주소" 
+                      value={loginData.email}
+                      onChange={(e) => setLoginData({...loginData, email: e.target.value})}
                       className="w-full pl-12 pr-4 py-4 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
                     />
                   </div>
                   <div className="relative">
                     <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
                     <input 
+                      required
                       type="password" 
                       placeholder="비밀번호" 
+                      value={loginData.password}
+                      onChange={(e) => setLoginData({...loginData, password: e.target.value})}
                       className="w-full pl-12 pr-4 py-4 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
                     />
                   </div>
-                  <button className="w-full py-4 bg-blue-600 text-white font-bold rounded-xl hover:bg-blue-700 shadow-lg shadow-blue-600/20 transition-all">
-                    로그인
+                  <button 
+                    disabled={isLoading}
+                    className="w-full py-4 bg-blue-600 text-white font-bold rounded-xl hover:bg-blue-700 shadow-lg shadow-blue-600/20 transition-all disabled:opacity-50"
+                  >
+                    {isLoading ? '인증 중...' : '로그인'}
                   </button>
                   <div className="text-center mt-6">
                     <p className="text-sm text-slate-500">
-                      계정이 없으신가요? <button onClick={() => setAuthMode('signup')} className="text-blue-600 font-bold hover:underline">회원가입</button>
+                      계정이 없으신가요? <button type="button" onClick={() => setAuthMode('signup')} className="text-blue-600 font-bold hover:underline">회원가입</button>
                     </p>
                   </div>
                 </form>
