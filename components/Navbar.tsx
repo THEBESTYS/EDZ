@@ -1,13 +1,26 @@
 
 import React, { useState, useEffect } from 'react';
-import { LogIn, UserPlus, X, Mail, Lock, Chrome } from 'lucide-react';
+import { LogIn, UserPlus, X, Mail, Lock, Chrome, User, Phone } from 'lucide-react';
 
-const Navbar: React.FC = () => {
+interface NavbarProps {
+  onAdminClick?: () => void;
+}
+
+const Navbar: React.FC<NavbarProps> = ({ onAdminClick }) => {
   const [scrolled, setScrolled] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [authMode, setAuthMode] = useState<'login' | 'signup'>('login');
+  const [isLoading, setIsLoading] = useState(false);
   
   const edsUrl = "https://thebestys.github.io/EDS/";
+
+  // Signup form state
+  const [formData, setFormData] = useState({
+    email: '',
+    phone: '',
+    name: '',
+    password: ''
+  });
 
   useEffect(() => {
     const handleScroll = () => {
@@ -26,6 +39,52 @@ const Navbar: React.FC = () => {
   const closeModal = () => {
     setIsModalOpen(false);
     document.body.style.overflow = 'unset';
+    setFormData({ email: '', phone: '', name: '', password: '' });
+  };
+
+  const handleSignup = (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
+
+    // Simulate database delay
+    setTimeout(() => {
+      const existingUsers = JSON.parse(localStorage.getItem('edstudy_users') || '[]');
+      const newUser = {
+        ...formData,
+        id: Date.now(),
+        createdAt: new Date().toISOString()
+      };
+      
+      localStorage.setItem('edstudy_users', JSON.stringify([...existingUsers, newUser]));
+      setIsLoading(false);
+      alert(`${formData.name}님, 회원가입이 완료되었습니다!`);
+      closeModal();
+    }, 1000);
+  };
+
+  const handleGoogleLogin = () => {
+    setIsLoading(true);
+    // Simulate Google OAuth
+    setTimeout(() => {
+      const existingUsers = JSON.parse(localStorage.getItem('edstudy_users') || '[]');
+      const googleUser = {
+        email: 'google_user@gmail.com',
+        phone: '010-0000-0000',
+        name: '구글 사용자',
+        password: '***',
+        id: Date.now(),
+        createdAt: new Date().toISOString(),
+        provider: 'google'
+      };
+      
+      if (!existingUsers.find((u: any) => u.email === googleUser.email)) {
+        localStorage.setItem('edstudy_users', JSON.stringify([...existingUsers, googleUser]));
+      }
+      
+      setIsLoading(false);
+      alert('Google 계정으로 로그인되었습니다.');
+      closeModal();
+    }, 1200);
   };
 
   return (
@@ -74,14 +133,14 @@ const Navbar: React.FC = () => {
               <X className="w-6 h-6" />
             </button>
 
-            <div className="p-10">
+            <div className="p-10 max-h-[90vh] overflow-y-auto">
               <div className="text-center mb-8">
                 <div className="inline-block bg-blue-600 text-white p-2 px-3 rounded-lg font-bold mb-4">ED Study</div>
                 <h3 className="text-2xl font-bold text-blue-950">
-                  {authMode === 'login' ? '환영합니다!' : '새로운 시작'}
+                  {authMode === 'login' ? '환영합니다!' : '회원가입'}
                 </h3>
                 <p className="text-slate-500 text-sm mt-2">
-                  {authMode === 'login' ? 'LMS 계정으로 로그인하세요' : '구글 계정으로 간편하게 시작하세요'}
+                  {authMode === 'login' ? 'LMS 계정으로 로그인하세요' : 'ED Study와 함께 변화를 시작하세요'}
                 </p>
               </div>
 
@@ -93,7 +152,7 @@ const Navbar: React.FC = () => {
                     <input 
                       type="email" 
                       placeholder="이메일 주소" 
-                      className="w-full pl-12 pr-4 py-4 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                      className="w-full pl-12 pr-4 py-4 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
                     />
                   </div>
                   <div className="relative">
@@ -101,7 +160,7 @@ const Navbar: React.FC = () => {
                     <input 
                       type="password" 
                       placeholder="비밀번호" 
-                      className="w-full pl-12 pr-4 py-4 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                      className="w-full pl-12 pr-4 py-4 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
                     />
                   </div>
                   <button className="w-full py-4 bg-blue-600 text-white font-bold rounded-xl hover:bg-blue-700 shadow-lg shadow-blue-600/20 transition-all">
@@ -109,26 +168,85 @@ const Navbar: React.FC = () => {
                   </button>
                   <div className="text-center mt-6">
                     <p className="text-sm text-slate-500">
-                      계정이 없으신가요? <button onClick={() => setAuthMode('signup')} className="text-blue-600 font-bold hover:underline">Sign-up</button>
+                      계정이 없으신가요? <button onClick={() => setAuthMode('signup')} className="text-blue-600 font-bold hover:underline">회원가입</button>
                     </p>
                   </div>
                 </form>
               ) : (
-                /* Sign-up View (Google) */
-                <div className="space-y-6">
-                  <button className="w-full py-4 px-6 border-2 border-slate-100 rounded-xl flex items-center justify-center gap-3 hover:bg-slate-50 transition-all group">
+                /* Enhanced Signup Form */
+                <form className="space-y-4" onSubmit={handleSignup}>
+                  <div className="relative">
+                    <User className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+                    <input 
+                      required
+                      type="text" 
+                      placeholder="성명" 
+                      value={formData.name}
+                      onChange={(e) => setFormData({...formData, name: e.target.value})}
+                      className="w-full pl-12 pr-4 py-4 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
+                    />
+                  </div>
+                  <div className="relative">
+                    <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+                    <input 
+                      required
+                      type="email" 
+                      placeholder="이메일 주소" 
+                      value={formData.email}
+                      onChange={(e) => setFormData({...formData, email: e.target.value})}
+                      className="w-full pl-12 pr-4 py-4 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
+                    />
+                  </div>
+                  <div className="relative">
+                    <Phone className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+                    <input 
+                      required
+                      type="tel" 
+                      placeholder="핸드폰 번호 (010-0000-0000)" 
+                      value={formData.phone}
+                      onChange={(e) => setFormData({...formData, phone: e.target.value})}
+                      className="w-full pl-12 pr-4 py-4 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
+                    />
+                  </div>
+                  <div className="relative">
+                    <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+                    <input 
+                      required
+                      type="password" 
+                      placeholder="비밀번호" 
+                      value={formData.password}
+                      onChange={(e) => setFormData({...formData, password: e.target.value})}
+                      className="w-full pl-12 pr-4 py-4 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
+                    />
+                  </div>
+                  <button 
+                    disabled={isLoading}
+                    className="w-full py-4 bg-blue-600 text-white font-bold rounded-xl hover:bg-blue-700 shadow-lg shadow-blue-600/20 transition-all disabled:opacity-50"
+                  >
+                    {isLoading ? '처리 중...' : '가입 완료'}
+                  </button>
+
+                  <div className="relative my-8">
+                    <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-slate-100"></div></div>
+                    <div className="relative flex justify-center text-xs uppercase"><span className="bg-white px-2 text-slate-400">Or continue with</span></div>
+                  </div>
+
+                  <button 
+                    type="button"
+                    onClick={handleGoogleLogin}
+                    disabled={isLoading}
+                    className="w-full py-4 px-6 border-2 border-slate-100 rounded-xl flex items-center justify-center gap-3 hover:bg-slate-50 transition-all group disabled:opacity-50"
+                  >
                     <Chrome className="w-6 h-6 text-blue-500 group-hover:scale-110 transition-transform" />
                     <span className="font-bold text-slate-700">Google 계정으로 계속하기</span>
                   </button>
-                  <p className="text-[11px] text-center text-slate-400 leading-relaxed">
-                    가입 시 ED Study의 <span className="underline">이용약관</span> 및 <span className="underline">개인정보처리방침</span>에 동의하게 됩니다.
-                  </p>
-                  <div className="text-center pt-4 border-t border-slate-100">
+
+                  <div className="text-center mt-6">
                     <p className="text-sm text-slate-500">
-                      이미 계정이 있으신가요? <button onClick={() => setAuthMode('login')} className="text-blue-600 font-bold hover:underline">로그인하기</button>
+                      이미 계정이 있으신가요? <button type="button" onClick={() => setAuthMode('login')} className="text-blue-600 font-bold hover:underline">로그인</button>
                     </p>
                   </div>
-                </div>
+                </form>
               )}
             </div>
           </div>

@@ -27,8 +27,8 @@ const Hero: React.FC = () => {
             </div>
           </div>
           
-          <h1 className="text-[3rem] sm:text-[4rem] md:text-[5rem] leading-[1.1] font-bold tracking-tight text-white mb-8 animate-fade-in" style={{ animationDelay: '0.1s' }}>
-            세계를 향한<br />언어의 확장이<br />시작되는 곳
+          <h1 className="text-[3.5rem] sm:text-[4.5rem] md:text-[5.5rem] leading-[1] font-bold tracking-tight text-white mb-8 animate-fade-in oswald-font" style={{ animationDelay: '0.1s' }}>
+            Change your word<br />to change<br />the world
           </h1>
 
           <p className="text-blue-100 text-lg max-w-lg mb-10 leading-relaxed animate-fade-in" style={{ animationDelay: '0.2s' }}>
