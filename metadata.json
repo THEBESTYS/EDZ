@@ -1,5 +1,7 @@
 {
   "name": "ED Study Landing Page",
   "description": "A high-conversion landing page for ED Study, an online English learning solution featuring AI-driven analysis and global content.",
-  "requestFramePermissions": []
+  "requestFramePermissions": [
+    "microphone"
+  ]
 }

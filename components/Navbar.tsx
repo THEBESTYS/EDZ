@@ -4,9 +4,10 @@ import { LogIn, UserPlus, X, Mail, Lock, Chrome, User, Phone, LockKeyhole } from
 
 interface NavbarProps {
   onAdminClick?: () => void;
+  onTestClick?: () => void;
 }
 
-const Navbar: React.FC<NavbarProps> = ({ onAdminClick }) => {
+const Navbar: React.FC<NavbarProps> = ({ onAdminClick, onTestClick }) => {
   const [scrolled, setScrolled] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [authMode, setAuthMode] = useState<'login' | 'signup'>('login');
@@ -14,7 +15,6 @@ const Navbar: React.FC<NavbarProps> = ({ onAdminClick }) => {
   const [isUserLoggedIn, setIsUserLoggedIn] = useState(false);
   
   const edsUrl = "https://thebestys.github.io/EDS/";
-  const sLevelTestUrl = "https://thebestys.github.io/EDAI/";
 
   // Form states
   const [formData, setFormData] = useState({
@@ -130,10 +130,12 @@ const Navbar: React.FC<NavbarProps> = ({ onAdminClick }) => {
   };
 
   const handleSLevelTestClick = (e: React.MouseEvent) => {
+    e.preventDefault();
     if (!isUserLoggedIn) {
-      e.preventDefault();
       alert('S-Level Test는 회원 전용 메뉴입니다. 먼저 로그인해 주세요.');
       openModal('login');
+    } else {
+      onTestClick?.();
     }
   };
 
@@ -154,16 +156,13 @@ const Navbar: React.FC<NavbarProps> = ({ onAdminClick }) => {
             <a href="#features" className="text-sm font-medium text-white hover:text-yellow-300 transition-colors">특장점</a>
             <div className="h-4 w-px bg-white/20 mx-2"></div>
             <a href={edsUrl} target="_blank" rel="noopener noreferrer" className="text-sm font-bold text-yellow-300 hover:text-white transition-colors">EDI</a>
-            <a 
-              href={sLevelTestUrl} 
-              target={isUserLoggedIn ? "_blank" : "_self"} 
-              rel="noopener noreferrer" 
+            <button 
               onClick={handleSLevelTestClick}
               className={`text-sm font-bold flex items-center gap-1 transition-colors ${isUserLoggedIn ? 'text-green-300 hover:text-white' : 'text-white/60 hover:text-white'}`}
             >
               {!isUserLoggedIn && <LockKeyhole className="w-3 h-3" />}
               S-Level Test
-            </a>
+            </button>
           </div>
 
           <div className="flex items-center gap-3">

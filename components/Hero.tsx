@@ -2,7 +2,11 @@
 import React from 'react';
 import { ArrowRight, PlayCircle, Award, MonitorPlay, BrainCircuit, Globe2 } from 'lucide-react';
 
-const Hero: React.FC = () => {
+interface HeroProps {
+  onStartTest: () => void;
+}
+
+const Hero: React.FC<HeroProps> = ({ onStartTest }) => {
   const edsUrl = "https://thebestys.github.io/EDS/";
 
   return (
@@ -37,14 +41,12 @@ const Hero: React.FC = () => {
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center animate-fade-in" style={{ animationDelay: '0.3s' }}>
-            <a 
-              href={edsUrl}
-              target="_blank"
-              rel="noopener noreferrer"
+            <button 
+              onClick={onStartTest}
               className="bg-white text-blue-900 px-8 py-4 font-bold text-base hover:bg-yellow-300 transition-all shadow-xl shadow-blue-900/20 rounded-lg hover:-translate-y-1 flex items-center gap-2"
             >
               무료 레벨테스트 <ArrowRight className="w-4 h-4" />
-            </a>
+            </button>
             <a 
               href={edsUrl}
               target="_blank"
