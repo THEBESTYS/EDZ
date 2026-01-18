@@ -5,7 +5,7 @@ import {
   ArrowLeft, Mic as MicIcon, StopCircle, CheckCircle2, 
   AlertCircle, BarChart3, Globe2, BrainCircuit, Headphones, 
   ArrowRight, ShieldCheck, PlayCircle, Loader2, Target, History, Trash2,
-  Upload, Clock, Sparkles
+  Upload, Clock, Sparkles, Key
 } from 'lucide-react';
 
 interface SLevelTestProps {
@@ -40,6 +40,7 @@ const SLevelTest: React.FC<SLevelTestProps> = ({ onExit }) => {
   const [result, setResult] = useState<AnalysisResult | null>(null);
   const [history, setHistory] = useState<AnalysisResult[]>([]);
   const [error, setError] = useState<string | null>(null);
+  const [needsKeySelection, setNeedsKeySelection] = useState(false);
   
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const timerRef = useRef<number | null>(null);
@@ -50,11 +51,27 @@ const SLevelTest: React.FC<SLevelTestProps> = ({ onExit }) => {
     const savedHistory = localStorage.getItem('edstudy_test_history');
     if (savedHistory) setHistory(JSON.parse(savedHistory));
     
+    // Check if key is already selected
+    const checkKey = async () => {
+      if (typeof window.aistudio?.hasSelectedApiKey === 'function') {
+        const hasKey = await window.aistudio.hasSelectedApiKey();
+        if (!hasKey) setNeedsKeySelection(true);
+      }
+    };
+    checkKey();
+
     return () => {
       if (timerRef.current) window.clearInterval(timerRef.current);
       if (analysisTimeoutRef.current) window.clearTimeout(analysisTimeoutRef.current);
     };
   }, []);
+
+  const handleOpenKeySelector = async () => {
+    if (typeof window.aistudio?.openSelectKey === 'function') {
+      await window.aistudio.openSelectKey();
+      setNeedsKeySelection(false);
+    }
+  };
 
   const saveToHistory = (newResult: AnalysisResult) => {
     const updated = [newResult, ...history].slice(0, 10);
@@ -109,9 +126,8 @@ const SLevelTest: React.FC<SLevelTestProps> = ({ onExit }) => {
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
-      // Max 20MB for better reliability
-      if (file.size > 20 * 1024 * 1024) {
-        alert("파일 크기는 20MB 이하여야 합니다. 더 긴 녹음이 필요한 경우 파일 압축을 권장합니다.");
+      if (file.size > 25 * 1024 * 1024) {
+        alert("파일 크기는 25MB 이하여야 합니다.");
         return;
       }
       setAudioBlob(file);
@@ -126,31 +142,37 @@ const SLevelTest: React.FC<SLevelTestProps> = ({ onExit }) => {
         const base64String = (reader.result as string).split(',')[1];
         resolve(base64String);
       };
-      reader.onerror = () => reject(new Error("파일을 읽는 중 오류가 발생했습니다."));
+      reader.onerror = () => reject(new Error("파일 로딩 실패"));
       reader.readAsDataURL(blob);
     });
   };
 
   const analyzeAudio = async () => {
     if (!audioBlob) return;
+    
+    // Check for key before proceeding
+    if (typeof window.aistudio?.hasSelectedApiKey === 'function') {
+      const hasKey = await window.aistudio.hasSelectedApiKey();
+      if (!hasKey) {
+        setNeedsKeySelection(true);
+        return;
+      }
+    }
+
     setIsAnalyzing(true);
     setError(null);
     setAnalysisSubStep(1);
     setAnalysisProgress(5);
 
-    // 타임아웃 설정 (90초)
     analysisTimeoutRef.current = window.setTimeout(() => {
       if (isAnalyzing) {
         setIsAnalyzing(false);
-        setError("분석 시간이 너무 오래 걸리고 있습니다. 네트워크 상태를 확인하거나 조금 더 짧은 파일로 시도해 주세요.");
+        setError("분석 대기 시간이 초과되었습니다. 네트워크 상태를 확인해 주세요.");
       }
-    }, 90000);
+    }, 120000);
 
     const progressInterval = setInterval(() => {
-      setAnalysisProgress(prev => {
-        if (prev < 90) return prev + Math.random() * 5;
-        return prev;
-      });
+      setAnalysisProgress(prev => (prev < 90 ? prev + Math.random() * 3 : prev));
     }, 1500);
 
     try {
@@ -158,20 +180,15 @@ const SLevelTest: React.FC<SLevelTestProps> = ({ onExit }) => {
       setAnalysisSubStep(2);
       setAnalysisProgress(30);
       
+      // Initialize AI instance right before call to use selected key
       const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
-      // Use flash for speed, but provide heavy system instructions for pro-level results
       const prompt = `
-        Evaluate the English proficiency of this audio with extreme precision. 
-        Analyze the speaker's grammar, vocabulary complexity, pronunciation clarity, and fluency.
-        
+        Evaluate English proficiency with precision. 
         RULES:
-        1. SPEED & EFFICIENCY: Process the entire length regardless of duration. 
-        2. LANGUAGE CHECK: If the speaker is mainly using Korean or just singing/humming without English, return "edLevel": "Pre-Basic" and explain in 'reasoning'.
-        3. ADVANCED LEVELING: Only award "Advanced 3" (C1/C2) to native-level proficiency (e.g., highly articulate, complex sentence structures, nuanced vocabulary).
-        4. CEFR STANDARDS: Strictly follow A1 to C2 framework.
-        5. ED LEVELS: Pre-Basic, Basic 1-3, Intermediate 1-3, Advanced 1-3.
-        
-        Return JSON with: edLevel, levelDesc, cefr, toeic, ielts, scores (pronunciation, fluency, vocabulary, grammar: 0-100), reasoning (in Korean), detectedLanguage.
+        1. IF NON-ENGLISH (Korean song/talk, noise): Return "edLevel": "Pre-Basic", "reasoning": "영어가 아닌 음성이 감지되었습니다."
+        2. IF ENGLISH: Assign "Advanced 1-3", "Intermediate 1-3", or "Basic 1-3".
+        3. BE STRICT: "Advanced 3" is for professional-native level.
+        Return JSON.
       `;
 
       setAnalysisSubStep(3);
@@ -232,8 +249,14 @@ const SLevelTest: React.FC<SLevelTestProps> = ({ onExit }) => {
     } catch (err: any) {
       clearInterval(progressInterval);
       if (analysisTimeoutRef.current) window.clearTimeout(analysisTimeoutRef.current);
-      console.error("Critical Analysis Error:", err);
-      setError(`분석에 실패했습니다: ${err.message || "서버 응답 지연"}. 다시 시도하거나 다른 브라우저를 이용해 보세요.`);
+      console.error("Analysis Error:", err);
+      
+      if (err.message?.includes("API Key") || err.message?.includes("entity was not found")) {
+        setNeedsKeySelection(true);
+        setError("분석을 위해 API 키 인증이 필요합니다. 아래 'API 키 선택' 버튼을 눌러주세요.");
+      } else {
+        setError(`분석 실패: ${err.message || "알 수 없는 오류"}. 다시 시도해 주세요.`);
+      }
       setIsAnalyzing(false);
     }
   };
@@ -246,10 +269,10 @@ const SLevelTest: React.FC<SLevelTestProps> = ({ onExit }) => {
 
   const getSubStepText = () => {
     switch(analysisSubStep) {
-      case 1: return "대용량 오디오 데이터 준비 중...";
-      case 2: return "AI 모델로 데이터 인코딩 및 전송 중...";
-      case 3: return "음성 언어 특징 및 문맥 분석 중 (초고속 모드)...";
-      case 4: return "CEFR 리포트 및 상세 등급 생성 중...";
+      case 1: return "오디오 파일 최적화 및 인코딩 중...";
+      case 2: return "AI 모델 연결 및 데이터 업로드 중...";
+      case 3: return "언어 지능 엔진 분석 중 (고속 모드)...";
+      case 4: return "진단 리포트 및 상세 등급 생성 중...";
       default: return "분석을 시작합니다...";
     }
   };
@@ -286,8 +309,8 @@ const SLevelTest: React.FC<SLevelTestProps> = ({ onExit }) => {
               </div>
               <h2 className="text-3xl font-bold text-slate-900 mb-4">AI 스피킹 레벨테스트</h2>
               <p className="text-slate-500 max-w-sm mx-auto leading-relaxed">
-                분량에 관계없이 꼼꼼하게.<br />
-                당신의 진짜 영어 실력을 1분 안에 확인하세요.
+                Gemini 3 고성능 AI 엔진을 통해<br />
+                당신의 진짜 영어 실력을 빠르고 정교하게 진단합니다.
               </p>
             </div>
 
@@ -377,8 +400,8 @@ const SLevelTest: React.FC<SLevelTestProps> = ({ onExit }) => {
             </div>
             <h2 className="text-3xl font-bold text-slate-900 mb-4">분석 준비 완료</h2>
             <p className="text-slate-500 mb-10 leading-relaxed">
-              긴 분량의 음성 파일도 문제없습니다.<br />
-              고성능 AI가 실력을 정밀하게 분석합니다.
+              업로드된 음성 파일을 Gemini 3 AI가<br />
+              실시간으로 정밀하게 분석합니다.
             </p>
             
             <div className="bg-white border border-slate-200 p-6 rounded-3xl mb-10 flex items-center gap-5 text-left shadow-sm">
@@ -386,28 +409,46 @@ const SLevelTest: React.FC<SLevelTestProps> = ({ onExit }) => {
                 <Clock className="w-6 h-6" />
               </div>
               <div className="flex-grow">
-                <div className="text-sm font-bold text-slate-700">분석 대기 중</div>
-                <div className="text-xs text-slate-400 mt-1">고속 분석 엔진 가동 준비 완료</div>
+                <div className="text-sm font-bold text-slate-700">고속 분석 모드</div>
+                <div className="text-xs text-slate-400 mt-1">대용량 오디오 정밀 스캔 준비됨</div>
               </div>
             </div>
 
-            <button 
-              onClick={analyzeAudio}
-              disabled={isAnalyzing}
-              className="w-full bg-blue-600 text-white py-6 rounded-3xl font-bold shadow-2xl shadow-blue-600/20 hover:bg-blue-700 transition-all flex items-center justify-center gap-3 disabled:opacity-50"
-            >
-              {isAnalyzing ? (
-                <>
-                  <Loader2 className="w-6 h-6 animate-spin" />
-                  실시간 분석 중...
-                </>
-              ) : (
-                <>
-                  <Sparkles className="w-6 h-6" />
-                  AI 분석 시작하기 (고속)
-                </>
-              )}
-            </button>
+            {needsKeySelection ? (
+              <div className="bg-amber-50 border border-amber-200 p-6 rounded-3xl mb-6">
+                <div className="flex items-center gap-3 text-amber-700 font-bold mb-4 justify-center">
+                  <Key className="w-5 h-5" /> API 키 인증 필요
+                </div>
+                <p className="text-xs text-amber-600 mb-6 leading-relaxed">
+                  Gemini 3 모델 사용을 위해 결제 프로필이 연결된<br />
+                  유효한 API 키 선택이 필요합니다.
+                </p>
+                <button 
+                  onClick={handleOpenKeySelector}
+                  className="w-full bg-amber-500 text-white py-4 rounded-2xl font-bold hover:bg-amber-600 transition-all shadow-lg shadow-amber-500/20"
+                >
+                  API 키 선택하기
+                </button>
+              </div>
+            ) : (
+              <button 
+                onClick={analyzeAudio}
+                disabled={isAnalyzing}
+                className="w-full bg-blue-600 text-white py-6 rounded-3xl font-bold shadow-2xl shadow-blue-600/20 hover:bg-blue-700 transition-all flex items-center justify-center gap-3 disabled:opacity-50"
+              >
+                {isAnalyzing ? (
+                  <>
+                    <Loader2 className="w-6 h-6 animate-spin" />
+                    AI 정밀 분석 중...
+                  </>
+                ) : (
+                  <>
+                    <Sparkles className="w-6 h-6" />
+                    AI 분석 시작하기
+                  </>
+                )}
+              </button>
+            )}
             
             {isAnalyzing && (
               <div className="mt-10 w-full animate-fade-in">
@@ -418,13 +459,13 @@ const SLevelTest: React.FC<SLevelTestProps> = ({ onExit }) => {
                   </div>
                   <div className="text-xs font-bold text-slate-400">{Math.round(analysisProgress)}%</div>
                 </div>
-                <div className="h-2 w-full bg-slate-100 rounded-full overflow-hidden">
+                <div className="h-2.5 w-full bg-slate-100 rounded-full overflow-hidden shadow-inner">
                   <div 
-                    className="h-full bg-blue-600 transition-all duration-500 ease-out" 
+                    className="h-full bg-blue-600 transition-all duration-700 ease-out" 
                     style={{ width: `${analysisProgress}%` }}
                   ></div>
                 </div>
-                <p className="mt-4 text-[10px] text-slate-400 italic">대용량 파일의 경우 AI 모델의 추론 시간에 따라 최대 1분 정도 소요될 수 있습니다.</p>
+                <p className="mt-4 text-[10px] text-slate-400 italic">대용량 파일의 경우 AI 엔진의 연산 처리에 최대 1분 정도 소요될 수 있습니다.</p>
               </div>
             )}
             
@@ -539,10 +580,18 @@ const SLevelTest: React.FC<SLevelTestProps> = ({ onExit }) => {
               <AlertCircle className="w-10 h-10" />
             </div>
             <div>
-              <div className="font-bold text-2xl">분석 중 지연이 발생했습니다</div>
+              <div className="font-bold text-2xl">분석 도중 지연 또는 오류 발생</div>
               <div className="text-base opacity-80 mt-4 leading-relaxed">{error}</div>
             </div>
-            <div className="flex gap-4">
+            <div className="flex flex-col sm:flex-row gap-4">
+              {needsKeySelection && (
+                <button 
+                  onClick={handleOpenKeySelector}
+                  className="bg-amber-500 text-white px-10 py-4 rounded-xl font-bold hover:bg-amber-600 transition-all"
+                >
+                  API 키 다시 선택
+                </button>
+              )}
               <button 
                 onClick={analyzeAudio} 
                 className="bg-red-600 text-white px-10 py-4 rounded-xl font-bold hover:bg-red-700 transition-all shadow-lg shadow-red-600/20"
