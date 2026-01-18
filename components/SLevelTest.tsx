@@ -105,9 +105,26 @@ const SLevelTest: React.FC<SLevelTestProps> = ({ onExit }) => {
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
-      setAudioBlob(e.target.files[0]);
+      const file = e.target.files[0];
+      if (file.size > 15 * 1024 * 1024) {
+        alert("파일 크기는 15MB 이하여야 합니다.");
+        return;
+      }
+      setAudioBlob(file);
       setStep(3);
     }
+  };
+
+  const readFileAsBase64 = (blob: Blob): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => {
+        const base64String = (reader.result as string).split(',')[1];
+        resolve(base64String);
+      };
+      reader.onerror = reject;
+      reader.readAsDataURL(blob);
+    });
   };
 
   const analyzeAudio = async () => {
@@ -118,82 +135,81 @@ const SLevelTest: React.FC<SLevelTestProps> = ({ onExit }) => {
 
     const subStepTimer = setInterval(() => {
       setAnalysisSubStep(prev => (prev < 4 ? prev + 1 : prev));
-    }, 2000);
+    }, 2500);
 
     try {
-      const reader = new FileReader();
-      reader.readAsDataURL(audioBlob);
-      reader.onloadend = async () => {
-        const base64Data = (reader.result as string).split(',')[1];
+      const base64Data = await readFileAsBase64(audioBlob);
+      
+      const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+      // Use gemini-3-flash-preview for faster processing and lower latency
+      const prompt = `
+        Task: Act as a Strict CEFR English Proficiency Evaluator.
         
-        const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
-        const prompt = `
-          Task: Act as a Strict CEFR English Proficiency Evaluator. 
-          Analyze the provided audio and return a detailed JSON evaluation.
+        CRITICAL EVALUATION STEPS:
+        1. DETECT LANGUAGE: Identify the main language of the audio.
+           - IF THE AUDIO IS NOT ENGLISH (e.g., Korean singing, Korean speech, humming, music, or non-English language): 
+             Return "edLevel": "Pre-Basic", "cefr": "N/A", "scores": all 0, "detectedLanguage": "Non-English", "reasoning": "영어가 아닌 음성(한국어 노래/대화 등)이 감지되었습니다. 영어 스피킹을 시도해주세요."
+           - DO NOT guess English words from non-English audio.
+        2. EVALUATE ENGLISH (If applicable):
+           - "Advanced 3" (C1/C2): Professional native-level (News anchor, official spokesperson). Impeccable.
+           - "Intermediate 3" (B2): High fluency with very minor errors.
+           - "Basic 1-3" (A1/A2): Simple sentences with limited vocabulary.
+        3. SCORING: Provide realistic 0-100 scores for pronunciation, fluency, vocabulary, and grammar.
+        4. ED LEVELS: Pre-Basic, Basic 1, Basic 2, Basic 3, Intermediate 1, Intermediate 2, Intermediate 3, Advanced 1, Advanced 2, Advanced 3.
+        
+        Return the result in JSON.
+      `;
 
-          CRITICAL EVALUATION RULES:
-          1. LANGUAGE DETECTION: First, identify the language. 
-             - If the audio contains NO English (e.g., Korean singing, speaking in Korean, humming, or just noise), you MUST set "edLevel" to "Pre-Basic", "cefr" to "N/A", and all scores to 0. 
-             - DO NOT hallucinate English from non-English audio.
-          2. PROFICIENCY GRADING (Be Strict):
-             - "Advanced 3" (C1/C2): Only for native-like, professional speakers (e.g., news anchors, spokespersons). Perfect grammar, rich vocabulary, and impeccable prosody.
-             - "Intermediate 3" (B2): For confident speakers with minor errors.
-             - "Basic 1-3" (A1/A2): For learners struggling with sentences.
-          3. SCORING (0-100): Be discriminative. If one aspect is good but another is bad, the scores must reflect that. Do not give a flat "70" for everything.
-          4. ED LEVELS: Pre-Basic, Basic 1, Basic 2, Basic 3, Intermediate 1, Intermediate 2, Intermediate 3, Advanced 1, Advanced 2, Advanced 3.
-        `;
-
-        const response = await ai.models.generateContent({
-          model: 'gemini-3-pro-preview',
-          contents: [
-            {
-              parts: [
-                { text: prompt },
-                { inlineData: { mimeType: audioBlob.type || 'audio/webm', data: base64Data } }
-              ]
-            }
-          ],
-          config: {
-            responseMimeType: "application/json",
-            responseSchema: {
-              type: Type.OBJECT,
-              properties: {
-                detectedLanguage: { type: Type.STRING, description: "Language detected in the audio." },
-                edLevel: { type: Type.STRING },
-                levelDesc: { type: Type.STRING },
-                cefr: { type: Type.STRING },
-                toeic: { type: Type.STRING },
-                ielts: { type: Type.STRING },
-                scores: {
-                  type: Type.OBJECT,
-                  properties: {
-                    pronunciation: { type: Type.NUMBER },
-                    fluency: { type: Type.NUMBER },
-                    vocabulary: { type: Type.NUMBER },
-                    grammar: { type: Type.NUMBER },
-                  },
-                  required: ["pronunciation", "fluency", "vocabulary", "grammar"]
-                },
-                reasoning: { type: Type.STRING, description: "Detailed explanation of the grade in Korean." }
-              },
-              required: ["detectedLanguage", "edLevel", "levelDesc", "cefr", "toeic", "ielts", "scores", "reasoning"]
-            }
+      const response = await ai.models.generateContent({
+        model: 'gemini-3-flash-preview',
+        contents: [
+          {
+            parts: [
+              { text: prompt },
+              { inlineData: { mimeType: audioBlob.type || 'audio/webm', data: base64Data } }
+            ]
           }
-        });
+        ],
+        config: {
+          responseMimeType: "application/json",
+          responseSchema: {
+            type: Type.OBJECT,
+            properties: {
+              detectedLanguage: { type: Type.STRING },
+              edLevel: { type: Type.STRING },
+              levelDesc: { type: Type.STRING },
+              cefr: { type: Type.STRING },
+              toeic: { type: Type.STRING },
+              ielts: { type: Type.STRING },
+              scores: {
+                type: Type.OBJECT,
+                properties: {
+                  pronunciation: { type: Type.NUMBER },
+                  fluency: { type: Type.NUMBER },
+                  vocabulary: { type: Type.NUMBER },
+                  grammar: { type: Type.NUMBER },
+                },
+                required: ["pronunciation", "fluency", "vocabulary", "grammar"]
+              },
+              reasoning: { type: Type.STRING }
+            },
+            required: ["detectedLanguage", "edLevel", "levelDesc", "cefr", "toeic", "ielts", "scores", "reasoning"]
+          }
+        }
+      });
 
-        const data = JSON.parse(response.text);
-        const finalResult = { ...data, timestamp: new Date().toISOString() };
-        
-        clearInterval(subStepTimer);
-        setResult(finalResult);
-        saveToHistory(finalResult);
-        setStep(4);
-        setIsAnalyzing(false);
-      };
+      const data = JSON.parse(response.text);
+      const finalResult = { ...data, timestamp: new Date().toISOString() };
+      
+      clearInterval(subStepTimer);
+      setResult(finalResult);
+      saveToHistory(finalResult);
+      setStep(4);
+      setIsAnalyzing(false);
     } catch (err) {
       clearInterval(subStepTimer);
-      console.error("Analysis failed", err);
-      setError("오디오 분석 중 오류가 발생했습니다. 파일 형식을 확인하거나 다시 녹음해 주세요.");
+      console.error("Analysis Error:", err);
+      setError("분석 중 오류가 발생했습니다. 파일이 너무 크거나 음질이 좋지 않을 수 있습니다. 1분 내외의 짧은 녹음으로 다시 시도해 보세요.");
       setIsAnalyzing(false);
     }
   };
@@ -206,11 +222,11 @@ const SLevelTest: React.FC<SLevelTestProps> = ({ onExit }) => {
 
   const getSubStepText = () => {
     switch(analysisSubStep) {
-      case 1: return "음성 데이터의 특징점을 추출하는 중...";
-      case 2: return "언어 및 발화 내용을 식별하는 중...";
-      case 3: return "CEFR 기준에 따라 문법 및 어휘력을 평가하는 중...";
-      case 4: return "최종 레벨 및 리포트를 생성하는 중...";
-      default: return "잠시만 기다려 주세요...";
+      case 1: return "오디오 데이터를 서버로 전송 중...";
+      case 2: return "음성 파형에서 특징을 추출하고 있습니다...";
+      case 3: return "CEFR 기준에 따라 실력을 대조 중...";
+      case 4: return "최종 리포트를 생성하고 있습니다...";
+      default: return "AI가 답변을 준비하고 있습니다...";
     }
   };
 
@@ -246,8 +262,8 @@ const SLevelTest: React.FC<SLevelTestProps> = ({ onExit }) => {
               </div>
               <h2 className="text-3xl font-bold text-slate-900 mb-4">무료 레벨테스트</h2>
               <p className="text-slate-500 max-w-sm mx-auto leading-relaxed">
-                세계적인 AI 엔진 Gemini 3 Pro를 통해<br />
-                당신의 진짜 영어 실력을 1분 만에 확인하세요.
+                세계적인 AI 엔진을 통해<br />
+                당신의 진짜 영어 실력을 빠르고 정확하게 확인하세요.
               </p>
             </div>
 
@@ -372,7 +388,7 @@ const SLevelTest: React.FC<SLevelTestProps> = ({ onExit }) => {
             {isAnalyzing && (
               <div className="mt-6 animate-pulse">
                 <div className="text-sm font-bold text-blue-600">{getSubStepText()}</div>
-                <div className="mt-2 text-xs text-slate-400">네트워크 환경에 따라 최대 30초가 소요될 수 있습니다.</div>
+                <div className="mt-2 text-xs text-slate-400">네트워크 및 파일 크기에 따라 수십 초가 소요될 수 있습니다.</div>
               </div>
             )}
             
