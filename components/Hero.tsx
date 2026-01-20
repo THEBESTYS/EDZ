@@ -10,7 +10,7 @@ const Hero: React.FC<HeroProps> = ({ onStartTest }) => {
   const edsUrl = "https://thebestys.github.io/EDS/";
 
   return (
-    <header id="about" className="relative min-h-[100svh] pt-20 overflow-hidden flex flex-col justify-between">
+    <header id="about" className="relative min-h-[calc(100svh-120px)] overflow-hidden flex flex-col justify-between">
       {/* Background Gradient */}
       <div className="absolute inset-0 bg-gradient-to-br from-blue-500 via-blue-600 to-indigo-800 z-0"></div>
       
