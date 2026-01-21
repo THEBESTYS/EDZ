@@ -10,9 +10,13 @@ import Footer from './components/Footer.tsx';
 import Admin from './components/Admin.tsx';
 import SLevelTest from './components/SLevelTest.tsx';
 import NoticeBar from './components/NoticeBar.tsx';
+import Booking from './components/Booking.tsx';
+import NoticeList from './components/NoticeList.tsx';
+
+type View = 'landing' | 'admin' | 'sleveltest' | 'booking' | 'notices';
 
 const App: React.FC = () => {
-  const [currentView, setCurrentView] = useState<'landing' | 'admin' | 'sleveltest'>('landing');
+  const [currentView, setCurrentView] = useState<View>('landing');
 
   useEffect(() => {
     const display = document.getElementById('status-display');
@@ -44,33 +48,42 @@ const App: React.FC = () => {
     setCurrentView('sleveltest');
   };
 
-  if (currentView === 'admin') {
-    return <Admin onExit={() => setCurrentView('landing')} />;
-  }
+  const renderView = () => {
+    switch (currentView) {
+      case 'admin':
+        return <Admin onExit={() => setCurrentView('landing')} />;
+      case 'sleveltest':
+        return <SLevelTest onExit={() => setCurrentView('landing')} />;
+      case 'booking':
+        return <Booking onExit={() => setCurrentView('landing')} />;
+      case 'notices':
+        return <NoticeList onExit={() => setCurrentView('landing')} />;
+      default:
+        return (
+          <div className="flex flex-col min-h-screen bg-blue-600">
+            <Navbar 
+              onAdminClick={() => setCurrentView('admin')} 
+              onTestClick={() => setCurrentView('sleveltest')} 
+              onBookingClick={() => setCurrentView('booking')}
+              onNoticeClick={() => setCurrentView('notices')}
+            />
+            <div className="pt-20"> {/* Fixed Navbar Space */}
+              <NoticeBar />
+            </div>
+            <main className="flex-grow">
+              <Hero onStartTest={handleStartTest} />
+              <Marquee />
+              <About />
+              <Curriculum onStartTest={handleStartTest} />
+              <Features />
+            </main>
+            <Footer onAdminClick={() => setCurrentView('admin')} />
+          </div>
+        );
+    }
+  };
 
-  if (currentView === 'sleveltest') {
-    return <SLevelTest onExit={() => setCurrentView('landing')} />;
-  }
-
-  return (
-    <div className="flex flex-col min-h-screen bg-blue-600">
-      <Navbar 
-        onAdminClick={() => setCurrentView('admin')} 
-        onTestClick={() => setCurrentView('sleveltest')} 
-      />
-      <div className="pt-20"> {/* Fixed Navbar Space */}
-        <NoticeBar />
-      </div>
-      <main className="flex-grow">
-        <Hero onStartTest={handleStartTest} />
-        <Marquee />
-        <About />
-        <Curriculum onStartTest={handleStartTest} />
-        <Features />
-      </main>
-      <Footer onAdminClick={() => setCurrentView('admin')} />
-    </div>
-  );
+  return renderView();
 };
 
 export default App;

@@ -1,19 +1,22 @@
 
 import React, { useState, useEffect } from 'react';
-import { LogIn, UserPlus, X, Mail, Lock, Chrome, User, Phone, LockKeyhole } from 'lucide-react';
+import { LogIn, UserPlus, X, Mail, Lock, Chrome, User, Phone, LockKeyhole, CalendarCheck2, Megaphone } from 'lucide-react';
 
 interface NavbarProps {
   onAdminClick?: () => void;
   onTestClick?: () => void;
+  onBookingClick?: () => void;
+  onNoticeClick?: () => void;
 }
 
-const Navbar: React.FC<NavbarProps> = ({ onAdminClick, onTestClick }) => {
+const Navbar: React.FC<NavbarProps> = ({ onAdminClick, onTestClick, onBookingClick, onNoticeClick }) => {
   const [scrolled, setScrolled] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [authMode, setAuthMode] = useState<'login' | 'signup'>('login');
   const [isLoading, setIsLoading] = useState(false);
   const [isUserLoggedIn, setIsUserLoggedIn] = useState(false);
   
+  const youtubeUrl = "https://www.youtube.com/watch?v=a4IU0ibrBDI&autoplay=1";
   const edsUrl = "https://thebestys.github.io/EDS/";
 
   // Form states
@@ -32,7 +35,6 @@ const Navbar: React.FC<NavbarProps> = ({ onAdminClick, onTestClick }) => {
     const handleScroll = () => {
       setScrolled(window.scrollY > 50);
     };
-    // Check session on load
     const session = sessionStorage.getItem('edstudy_session');
     if (session) setIsUserLoggedIn(true);
 
@@ -63,7 +65,7 @@ const Navbar: React.FC<NavbarProps> = ({ onAdminClick, onTestClick }) => {
         ...formData,
         id: Date.now(),
         createdAt: new Date().toISOString(),
-        level: 'Silver' // Default level
+        level: 'Silver'
       };
       
       localStorage.setItem('edstudy_users', JSON.stringify([...existingUsers, newUser]));
@@ -127,15 +129,15 @@ const Navbar: React.FC<NavbarProps> = ({ onAdminClick, onTestClick }) => {
     sessionStorage.removeItem('edstudy_session');
     setIsUserLoggedIn(false);
     alert('로그아웃 되었습니다.');
+    window.location.reload();
   };
 
-  const handleSLevelTestClick = (e: React.MouseEvent) => {
-    e.preventDefault();
+  const checkLogin = (callback: () => void) => {
     if (!isUserLoggedIn) {
-      alert('S-Level Test는 회원 전용 메뉴입니다. 먼저 로그인해 주세요.');
+      alert('이 서비스는 회원 전용 메뉴입니다. 먼저 로그인해 주세요.');
       openModal('login');
     } else {
-      onTestClick?.();
+      callback();
     }
   };
 
@@ -143,7 +145,7 @@ const Navbar: React.FC<NavbarProps> = ({ onAdminClick, onTestClick }) => {
     <>
       <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${scrolled ? 'bg-blue-600/90 backdrop-blur-md shadow-lg h-16' : 'h-20'}`}>
         <div className="max-w-7xl mx-auto px-6 md:px-12 h-full flex items-center justify-between">
-          <a href="#" className="flex items-center gap-2 group">
+          <a href="/" className="flex items-center gap-2 group">
             <div className="bg-white text-blue-600 p-1 px-2 rounded font-bold en-font text-lg group-hover:bg-yellow-300 transition-colors">
               ED
             </div>
@@ -151,13 +153,17 @@ const Navbar: React.FC<NavbarProps> = ({ onAdminClick, onTestClick }) => {
           </a>
           
           <div className="hidden md:flex items-center gap-6">
-            <a href="#about" className="text-sm font-medium text-white hover:text-yellow-300 transition-colors">소개</a>
-            <a href="#curriculum" className="text-sm font-medium text-white hover:text-yellow-300 transition-colors">커리큘럼</a>
-            <a href="#features" className="text-sm font-medium text-white hover:text-yellow-300 transition-colors">특장점</a>
+            <a href={youtubeUrl} target="_blank" rel="noopener noreferrer" className="text-sm font-medium text-white hover:text-yellow-300 transition-colors">소개</a>
+            <button onClick={onNoticeClick} className="text-sm font-medium text-white hover:text-yellow-300 transition-colors flex items-center gap-1">
+              <Megaphone className="w-3 h-3" /> 공지사항
+            </button>
+            <button onClick={() => checkLogin(() => onBookingClick?.())} className="text-sm font-medium text-white hover:text-yellow-300 transition-colors flex items-center gap-1">
+              <CalendarCheck2 className="w-3 h-3" /> 상담 예약
+            </button>
             <div className="h-4 w-px bg-white/20 mx-2"></div>
             <a href={edsUrl} target="_blank" rel="noopener noreferrer" className="text-sm font-bold text-yellow-300 hover:text-white transition-colors">EDI</a>
             <button 
-              onClick={handleSLevelTestClick}
+              onClick={() => checkLogin(() => onTestClick?.())}
               className={`text-sm font-bold flex items-center gap-1 transition-colors ${isUserLoggedIn ? 'text-green-300 hover:text-white' : 'text-white/60 hover:text-white'}`}
             >
               {!isUserLoggedIn && <LockKeyhole className="w-3 h-3" />}
@@ -216,7 +222,6 @@ const Navbar: React.FC<NavbarProps> = ({ onAdminClick, onTestClick }) => {
               </div>
 
               {authMode === 'login' ? (
-                /* Login Form */
                 <form className="space-y-4" onSubmit={handleLogin}>
                   <div className="relative">
                     <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
@@ -253,7 +258,6 @@ const Navbar: React.FC<NavbarProps> = ({ onAdminClick, onTestClick }) => {
                   </div>
                 </form>
               ) : (
-                /* Enhanced Signup Form */
                 <form className="space-y-4" onSubmit={handleSignup}>
                   <div className="relative">
                     <User className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
