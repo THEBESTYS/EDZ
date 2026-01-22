@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { 
   ArrowLeft, BookOpen, ChevronRight, Layout, Settings, 
-  Monitor, Info, BarChart, Sitemap, Dictionary, Users, 
+  Monitor, Info, BarChart, Network, Library, Users, 
   LogOut, Star, Lightbulb, AlertTriangle, Headphones,
   PlayCircle, Download
 } from 'lucide-react';
@@ -18,8 +18,8 @@ const Manual: React.FC<ManualProps> = ({ onExit }) => {
     { id: 'start', label: '시작하기', icon: <PlayCircle className="w-4 h-4" /> },
     { id: 'navigation', label: '메인 메뉴 탐색', icon: <Layout className="w-4 h-4" /> },
     { id: 'progress', label: '학습 진도 확인', icon: <BarChart className="w-4 h-4" /> },
-    { id: 'structure', label: '강의 구조 이해', icon: <Sitemap className="w-4 h-4" /> },
-    { id: 'dictionary', label: '사전 사용법', icon: <BookOpen className="w-4 h-4" /> },
+    { id: 'structure', label: '강의 구조 이해', icon: <Network className="w-4 h-4" /> },
+    { id: 'dictionary', label: '사전 사용법', icon: <Library className="w-4 h-4" /> },
     { id: 'community', label: '커뮤니티 활용', icon: <Users className="w-4 h-4" /> },
     { id: 'logout', label: '안전한 로그아웃', icon: <LogOut className="w-4 h-4" /> },
   ];
@@ -234,7 +234,7 @@ const Manual: React.FC<ManualProps> = ({ onExit }) => {
         {/* Section: 강의 구조 이해 */}
         <section id="structure" className="mb-24 scroll-mt-32">
           <div className="flex items-center gap-3 mb-10">
-            <div className="bg-blue-600 p-2 rounded-xl text-white"><Sitemap className="w-6 h-6" /></div>
+            <div className="bg-blue-600 p-2 rounded-xl text-white"><Network className="w-6 h-6" /></div>
             <h2 className="text-3xl font-black text-blue-950 tracking-tight">강의 구조 이해</h2>
           </div>
           
@@ -278,7 +278,7 @@ const Manual: React.FC<ManualProps> = ({ onExit }) => {
         {/* Section: 사전 사용법 */}
         <section id="dictionary" className="mb-24 scroll-mt-32">
           <div className="flex items-center gap-3 mb-10">
-            <div className="bg-blue-600 p-2 rounded-xl text-white"><Dictionary className="w-6 h-6" /></div>
+            <div className="bg-blue-600 p-2 rounded-xl text-white"><Library className="w-6 h-6" /></div>
             <h2 className="text-3xl font-black text-blue-950 tracking-tight">내장 사전 사용법</h2>
           </div>
           
@@ -324,7 +324,6 @@ const Manual: React.FC<ManualProps> = ({ onExit }) => {
           </div>
           
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {/* Fix: changed property name 'i' to 'icon' to match usage in mapping */}
             {[
               { t: '토론 포럼', d: '다른 학습자와의 의견 교환.', icon: <Users className="w-6 h-6" /> },
               { t: '매거진', d: '수준별 뉴스 및 아티클 독해.', icon: <BookOpen className="w-6 h-6" /> },
