@@ -12,8 +12,9 @@ import SLevelTest from './components/SLevelTest.tsx';
 import NoticeBar from './components/NoticeBar.tsx';
 import Booking from './components/Booking.tsx';
 import NoticeList from './components/NoticeList.tsx';
+import Manual from './components/Manual.tsx';
 
-type View = 'landing' | 'admin' | 'sleveltest' | 'booking' | 'notices';
+type View = 'landing' | 'admin' | 'sleveltest' | 'booking' | 'notices' | 'manual';
 
 const App: React.FC = () => {
   const [currentView, setCurrentView] = useState<View>('landing');
@@ -58,6 +59,8 @@ const App: React.FC = () => {
         return <Booking onExit={() => setCurrentView('landing')} />;
       case 'notices':
         return <NoticeList onExit={() => setCurrentView('landing')} />;
+      case 'manual':
+        return <Manual onExit={() => setCurrentView('landing')} />;
       default:
         return (
           <div className="flex flex-col min-h-screen bg-blue-600">
@@ -66,6 +69,7 @@ const App: React.FC = () => {
               onTestClick={() => setCurrentView('sleveltest')} 
               onBookingClick={() => setCurrentView('booking')}
               onNoticeClick={() => setCurrentView('notices')}
+              onManualClick={() => setCurrentView('manual')}
             />
             <div className="pt-20"> {/* Fixed Navbar Space */}
               <NoticeBar />

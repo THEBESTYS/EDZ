@@ -1,15 +1,16 @@
 
 import React, { useState, useEffect } from 'react';
-import { LogIn, UserPlus, X, Mail, Lock, Chrome, User, Phone, LockKeyhole, CalendarCheck2, Megaphone } from 'lucide-react';
+import { LogIn, UserPlus, X, Mail, Lock, Chrome, User, Phone, LockKeyhole, CalendarCheck2, Megaphone, BookOpen } from 'lucide-react';
 
 interface NavbarProps {
   onAdminClick?: () => void;
   onTestClick?: () => void;
   onBookingClick?: () => void;
   onNoticeClick?: () => void;
+  onManualClick?: () => void;
 }
 
-const Navbar: React.FC<NavbarProps> = ({ onAdminClick, onTestClick, onBookingClick, onNoticeClick }) => {
+const Navbar: React.FC<NavbarProps> = ({ onAdminClick, onTestClick, onBookingClick, onNoticeClick, onManualClick }) => {
   const [scrolled, setScrolled] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [authMode, setAuthMode] = useState<'login' | 'signup'>('login');
@@ -154,6 +155,9 @@ const Navbar: React.FC<NavbarProps> = ({ onAdminClick, onTestClick, onBookingCli
           
           <div className="hidden md:flex items-center gap-6">
             <a href={youtubeUrl} target="_blank" rel="noopener noreferrer" className="text-sm font-medium text-white hover:text-yellow-300 transition-colors">소개</a>
+            <button onClick={onManualClick} className="text-sm font-medium text-white hover:text-yellow-300 transition-colors flex items-center gap-1">
+              <BookOpen className="w-3 h-3" /> 매뉴얼
+            </button>
             <button onClick={onNoticeClick} className="text-sm font-medium text-white hover:text-yellow-300 transition-colors flex items-center gap-1">
               <Megaphone className="w-3 h-3" /> 공지사항
             </button>
@@ -201,7 +205,7 @@ const Navbar: React.FC<NavbarProps> = ({ onAdminClick, onTestClick, onBookingCli
         </div>
       </nav>
 
-      {/* Auth Modal */}
+      {/* Auth Modal (Login/Signup) */}
       {isModalOpen && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-blue-950/60 backdrop-blur-sm" onClick={closeModal}></div>
