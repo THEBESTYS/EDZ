@@ -13,8 +13,9 @@ import NoticeBar from './components/NoticeBar.tsx';
 import Booking from './components/Booking.tsx';
 import NoticeList from './components/NoticeList.tsx';
 import Manual from './components/Manual.tsx';
+import Intro from './components/Intro.tsx';
 
-type View = 'landing' | 'admin' | 'sleveltest' | 'booking' | 'notices' | 'manual';
+type View = 'landing' | 'admin' | 'sleveltest' | 'booking' | 'notices' | 'manual' | 'intro';
 
 const App: React.FC = () => {
   const [currentView, setCurrentView] = useState<View>('landing');
@@ -61,6 +62,8 @@ const App: React.FC = () => {
         return <NoticeList onExit={() => setCurrentView('landing')} />;
       case 'manual':
         return <Manual onExit={() => setCurrentView('landing')} />;
+      case 'intro':
+        return <Intro onExit={() => setCurrentView('landing')} />;
       default:
         return (
           <div className="flex flex-col min-h-screen bg-blue-600">
@@ -70,12 +73,13 @@ const App: React.FC = () => {
               onBookingClick={() => setCurrentView('booking')}
               onNoticeClick={() => setCurrentView('notices')}
               onManualClick={() => setCurrentView('manual')}
+              onIntroClick={() => setCurrentView('intro')}
             />
             <div className="pt-20"> {/* Fixed Navbar Space */}
               <NoticeBar />
             </div>
             <main className="flex-grow">
-              <Hero onStartTest={handleStartTest} />
+              <Hero onStartTest={handleStartTest} onIntroClick={() => setCurrentView('intro')} />
               <Marquee />
               <About />
               <Curriculum onStartTest={handleStartTest} />

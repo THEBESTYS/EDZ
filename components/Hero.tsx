@@ -1,14 +1,13 @@
 
 import React from 'react';
-import { ArrowRight, PlayCircle, Award, MonitorPlay, BrainCircuit, Globe2 } from 'lucide-react';
+import { ArrowRight, PlayCircle, Award, MonitorPlay, BrainCircuit, Globe2, Info } from 'lucide-react';
 
 interface HeroProps {
   onStartTest: () => void;
+  onIntroClick: () => void;
 }
 
-const Hero: React.FC<HeroProps> = ({ onStartTest }) => {
-  const edsUrl = "https://thebestys.github.io/EDS/";
-
+const Hero: React.FC<HeroProps> = ({ onStartTest, onIntroClick }) => {
   return (
     <header id="about" className="relative min-h-[calc(100svh-120px)] overflow-hidden flex flex-col justify-between">
       {/* Background Gradient */}
@@ -47,14 +46,12 @@ const Hero: React.FC<HeroProps> = ({ onStartTest }) => {
             >
               무료 레벨테스트 <ArrowRight className="w-4 h-4" />
             </button>
-            <a 
-              href={edsUrl}
-              target="_blank"
-              rel="noopener noreferrer"
+            <button 
+              onClick={onIntroClick}
               className="px-8 py-4 font-medium text-base text-white border border-white/30 hover:bg-white/10 transition-colors rounded-lg flex items-center gap-2"
             >
-              <PlayCircle className="w-5 h-5" /> 플랫폼 미리보기
-            </a>
+              <Info className="w-5 h-5" /> English Discoveries
+            </button>
           </div>
         </div>
 

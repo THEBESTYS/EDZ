@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { LogIn, UserPlus, X, Mail, Lock, Chrome, User, Phone, LockKeyhole, CalendarCheck2, Megaphone, BookOpen } from 'lucide-react';
+import { LogIn, UserPlus, X, Mail, Lock, Chrome, User, Phone, LockKeyhole, CalendarCheck2, Megaphone, BookOpen, Info, Youtube } from 'lucide-react';
 
 interface NavbarProps {
   onAdminClick?: () => void;
@@ -8,9 +8,10 @@ interface NavbarProps {
   onBookingClick?: () => void;
   onNoticeClick?: () => void;
   onManualClick?: () => void;
+  onIntroClick?: () => void;
 }
 
-const Navbar: React.FC<NavbarProps> = ({ onAdminClick, onTestClick, onBookingClick, onNoticeClick, onManualClick }) => {
+const Navbar: React.FC<NavbarProps> = ({ onAdminClick, onTestClick, onBookingClick, onNoticeClick, onManualClick, onIntroClick }) => {
   const [scrolled, setScrolled] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [authMode, setAuthMode] = useState<'login' | 'signup'>('login');
@@ -154,7 +155,9 @@ const Navbar: React.FC<NavbarProps> = ({ onAdminClick, onTestClick, onBookingCli
           </a>
           
           <div className="hidden md:flex items-center gap-6">
-            <a href={youtubeUrl} target="_blank" rel="noopener noreferrer" className="text-sm font-medium text-white hover:text-yellow-300 transition-colors">소개</a>
+            <button onClick={onIntroClick} className="text-sm font-bold text-white hover:text-yellow-300 transition-colors flex items-center gap-1">
+              <Info className="w-3 h-3" /> About
+            </button>
             <button onClick={onManualClick} className="text-sm font-medium text-white hover:text-yellow-300 transition-colors flex items-center gap-1">
               <BookOpen className="w-3 h-3" /> 매뉴얼
             </button>
@@ -173,6 +176,9 @@ const Navbar: React.FC<NavbarProps> = ({ onAdminClick, onTestClick, onBookingCli
               {!isUserLoggedIn && <LockKeyhole className="w-3 h-3" />}
               S-Level Test
             </button>
+            <a href={youtubeUrl} target="_blank" rel="noopener noreferrer" className="text-sm font-medium text-white/60 hover:text-yellow-300 transition-colors flex items-center gap-1">
+              <Youtube className="w-3 h-3" /> 영상
+            </a>
           </div>
 
           <div className="flex items-center gap-3">
